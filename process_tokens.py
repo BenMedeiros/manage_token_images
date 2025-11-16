@@ -232,12 +232,12 @@ def process_all_images(input_folder="img/input", output_subfolder="img/output"):
             "settings": {
                 "print_width": 8.5,
                 "print_height": 11.0,
-                "x_margin": 0.5,
-                "y_margin": 0.5,
-                "x_spacer": 0.2,
-                "y_spacer": 0.2,
+                "x_margin": 0.3,
+                "y_margin": 0.3,
+                "x_spacer": 0.15,
+                "y_spacer": 0.15,
                 "token_size": 1.0,
-                "ppi": 300
+                "ppi": [300, 600]
             },
             "tokens_quantity_list": [
                 {"filename": meta["filename"], "quantity": 1}

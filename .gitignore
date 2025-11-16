@@ -1,3 +1,3 @@
-*.png
-output/**/*.png
-saved_templates/**/*.png
+
+img/output/**/*.png
+img/templates/**/*.png
