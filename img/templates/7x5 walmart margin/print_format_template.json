@@ -2,7 +2,7 @@
   "settings": {
     "print_width": 7,
     "print_height": 5,
-    "x_margin": 0.1,
+    "x_margin": 0.5,
     "y_margin": 0.2,
     "x_spacer": 0.15,
     "y_spacer": 0.2,
@@ -12,12 +12,12 @@
       600
     ],
     "calculated": {
-      "tokens_per_row": 6,
+      "tokens_per_row": 5,
       "tokens_per_col": 4,
-      "tokens_per_page": 24,
-      "wasted_x": 0.05,
+      "tokens_per_page": 20,
+      "wasted_x": 0.4,
       "wasted_y": 0.0,
-      "total_tokens": 24,
+      "total_tokens": 20,
       "wasted_tokens": 0
     }
   },
@@ -25,17 +25,17 @@
     {
       "filename": "dungeonrush_cover1.png",
       "subfolder": "dungeonrush",
-      "quantity": 5
+      "quantity": 3
     },
     {
       "filename": "dungeonrush_cover2.png",
       "subfolder": "dungeonrush",
-      "quantity": 4
+      "quantity": 3
     },
     {
       "filename": "empty.png",
       "subfolder": "dungeonrush",
-      "quantity": 2
+      "quantity": 1
     },
     {
       "filename": "trap_bomb.png",

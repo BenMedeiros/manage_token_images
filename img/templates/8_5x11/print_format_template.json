@@ -17,24 +17,24 @@
       "tokens_per_page": 63,
       "wasted_x": 0.0,
       "wasted_y": 0.2,
-      "total_tokens": 34,
-      "wasted_tokens": 29
+      "total_tokens": 63,
+      "wasted_tokens": 0
     }
   },
   "tokens_quantity_list": [
     {
       "filename": "dungeonrush_cover1.png",
-      "quantity": 7,
+      "quantity": 14,
       "subfolder": "dungeonrush"
     },
     {
       "filename": "dungeonrush_cover2.png",
-      "quantity": 7,
+      "quantity": 13,
       "subfolder": "dungeonrush"
     },
     {
       "filename": "empty.png",
-      "quantity": 7,
+      "quantity": 13,
       "subfolder": "dungeonrush"
     },
     {
@@ -44,52 +44,52 @@
     },
     {
       "filename": "trap_cage.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "dungeonrush"
     },
     {
       "filename": "trap_oilslick.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "dungeonrush"
     },
     {
       "filename": "trap_pushback.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "dungeonrush"
     },
     {
       "filename": "trap_spikes.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "dungeonrush"
     },
     {
       "filename": "treasure.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "dungeonrush"
     },
     {
       "filename": "wall.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "dungeonrush"
     },
     {
       "filename": "quantum_gobblet_l.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "quantumgobblet"
     },
     {
       "filename": "quantum_gobblet_m.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "quantumgobblet"
     },
     {
       "filename": "quantum_gobblet_s.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "quantumgobblet"
     },
     {
       "filename": "quantum_gobblet_xl.png",
-      "quantity": 1,
+      "quantity": 2,
       "subfolder": "quantumgobblet"
     },
     {
