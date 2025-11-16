@@ -1,0 +1,61 @@
+{
+  "settings": {
+    "print_width": 8.5,
+    "print_height": 11,
+    "x_margin": 0.3,
+    "y_margin": 0.3,
+    "x_spacer": 0.15,
+    "y_spacer": 0.15,
+    "token_size": 1.0,
+    "ppi": 300,
+    "calculated": {
+      "tokens_per_row": 7,
+      "tokens_per_col": 9,
+      "tokens_per_page": 63,
+      "wasted_x": 0.0,
+      "wasted_y": 0.2
+    }
+  },
+  "tokens_quantity_list": [
+    {
+      "filename": "dungeonrush_cover1.png",
+      "quantity": 15
+    },
+    {
+      "filename": "dungeonrush_cover2.png",
+      "quantity": 15
+    },
+    {
+      "filename": "empty.png",
+      "quantity": 16
+    },
+    {
+      "filename": "trap_bomb.png",
+      "quantity": 2
+    },
+    {
+      "filename": "trap_cage.png",
+      "quantity": 2
+    },
+    {
+      "filename": "trap_oilslick.png",
+      "quantity": 2
+    },
+    {
+      "filename": "trap_pushback.png",
+      "quantity": 2
+    },
+    {
+      "filename": "trap_spikes.png",
+      "quantity": 2
+    },
+    {
+      "filename": "treasure.png",
+      "quantity": 2
+    },
+    {
+      "filename": "wall.png",
+      "quantity": 2
+    }
+  ]
+}

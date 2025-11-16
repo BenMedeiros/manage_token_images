@@ -1,0 +1,192 @@
+[
+  {
+    "filename": "dungeonrush_cover1.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.6,
+    "ypos": 511.4,
+    "diameter": 814.9,
+    "circularity": 0.9,
+    "aspect_ratio": 1.004,
+    "major_axis": 814.1,
+    "minor_axis": 811.1,
+    "ellipse_angle": 90.5,
+    "border_color": {
+      "r": 48,
+      "g": 48,
+      "b": 48,
+      "hex": "#303030"
+    }
+  },
+  {
+    "filename": "dungeonrush_cover2.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.4,
+    "ypos": 511.4,
+    "diameter": 814.8,
+    "circularity": 0.899,
+    "aspect_ratio": 1.004,
+    "major_axis": 814.1,
+    "minor_axis": 811.1,
+    "ellipse_angle": 90.4,
+    "border_color": {
+      "r": 50,
+      "g": 49,
+      "b": 49,
+      "hex": "#323131"
+    }
+  },
+  {
+    "filename": "empty.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 515.8,
+    "ypos": 508.2,
+    "diameter": 811.9,
+    "circularity": 0.9,
+    "aspect_ratio": 1.001,
+    "major_axis": 809.6,
+    "minor_axis": 808.7,
+    "ellipse_angle": 63.8,
+    "border_color": {
+      "r": 45,
+      "g": 45,
+      "b": 45,
+      "hex": "#2d2d2d"
+    }
+  },
+  {
+    "filename": "trap_bomb.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 515.0,
+    "ypos": 509.6,
+    "diameter": 812.9,
+    "circularity": 0.899,
+    "aspect_ratio": 1.001,
+    "major_axis": 810.8,
+    "minor_axis": 810.1,
+    "ellipse_angle": 15.9,
+    "border_color": {
+      "r": 47,
+      "g": 47,
+      "b": 47,
+      "hex": "#2f2f2f"
+    }
+  },
+  {
+    "filename": "trap_cage.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.6,
+    "ypos": 511.7,
+    "diameter": 818.8,
+    "circularity": 0.899,
+    "aspect_ratio": 1.001,
+    "major_axis": 816.9,
+    "minor_axis": 816.1,
+    "ellipse_angle": 94.9,
+    "border_color": {
+      "r": 51,
+      "g": 51,
+      "b": 51,
+      "hex": "#333333"
+    }
+  },
+  {
+    "filename": "trap_oilslick.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 514.1,
+    "ypos": 511.3,
+    "diameter": 811.9,
+    "circularity": 0.9,
+    "aspect_ratio": 1.001,
+    "major_axis": 810.1,
+    "minor_axis": 809.0,
+    "ellipse_angle": 100.3,
+    "border_color": {
+      "r": 48,
+      "g": 48,
+      "b": 48,
+      "hex": "#303030"
+    }
+  },
+  {
+    "filename": "trap_pushback.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.6,
+    "ypos": 513.2,
+    "diameter": 814.6,
+    "circularity": 0.899,
+    "aspect_ratio": 1.005,
+    "major_axis": 813.3,
+    "minor_axis": 809.3,
+    "ellipse_angle": 92.4,
+    "border_color": {
+      "r": 50,
+      "g": 50,
+      "b": 50,
+      "hex": "#323232"
+    }
+  },
+  {
+    "filename": "trap_spikes.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.5,
+    "ypos": 511.6,
+    "diameter": 780.9,
+    "circularity": 0.9,
+    "aspect_ratio": 1.001,
+    "major_axis": 779.3,
+    "minor_axis": 778.8,
+    "ellipse_angle": 102.6,
+    "border_color": {
+      "r": 50,
+      "g": 50,
+      "b": 49,
+      "hex": "#323231"
+    }
+  },
+  {
+    "filename": "treasure.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.7,
+    "ypos": 512.3,
+    "diameter": 818.7,
+    "circularity": 0.899,
+    "aspect_ratio": 1.002,
+    "major_axis": 816.6,
+    "minor_axis": 815.4,
+    "ellipse_angle": 11.7,
+    "border_color": {
+      "r": 49,
+      "g": 49,
+      "b": 49,
+      "hex": "#313131"
+    }
+  },
+  {
+    "filename": "wall.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 513.2,
+    "ypos": 510.5,
+    "diameter": 816.2,
+    "circularity": 0.899,
+    "aspect_ratio": 1.001,
+    "major_axis": 814.0,
+    "minor_axis": 812.9,
+    "ellipse_angle": 69.0,
+    "border_color": {
+      "r": 49,
+      "g": 49,
+      "b": 49,
+      "hex": "#313131"
+    }
+  }
+]

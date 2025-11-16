@@ -1,0 +1,3 @@
+*.png
+output/**/*.png
+saved_templates/**/*.png
