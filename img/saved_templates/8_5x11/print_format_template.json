@@ -7,7 +7,12 @@
     "x_spacer": 0.15,
     "y_spacer": 0.15,
     "token_size": 1.0,
-    "ppi": 300,
+    "ppi": [
+      200,
+      300,
+      400,
+      600
+    ],
     "calculated": {
       "tokens_per_row": 7,
       "tokens_per_col": 9,
