@@ -9,7 +9,6 @@
     "token_size": 1.0,
     "ppi": [
       300,
-      400,
       600
     ],
     "calculated": {

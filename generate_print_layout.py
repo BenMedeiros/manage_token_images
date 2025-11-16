@@ -179,52 +179,258 @@ def create_print_layout(template, output_base_path, metadata_path):
     
     # Generate each page
     for page_num in range(pages_needed):
-        # Create blank white page
+        # Create blank white page (BGRA format)
         page = np.ones((page_height_px, page_width_px, 4), dtype=np.uint8) * 255
         
         # Draw grid lines BEFORE placing tokens
-        gray = (128, 128, 128)  # Gray color for grid lines
+        gray_bgr = (128, 128, 128, 255)  # Gray color for fine lines with full opacity
+        black_bgr = (0, 0, 0, 255)  # Black color for grid outline with full opacity
         line_thickness = 1
         
         # Draw margin lines (page boundaries)
         cv2.rectangle(page, 
                      (x_margin_px, y_margin_px),
                      (page_width_px - x_margin_px, page_height_px - y_margin_px),
-                     gray, line_thickness)
+                     gray_bgr, line_thickness)
         
         # Draw vertical grid lines
         for col in range(tokens_per_row + 1):
             # Left edge of each token column
             x_left = x_margin_px + col * (token_size_px + x_spacer_px)
-            cv2.line(page, (x_left, y_margin_px), (x_left, page_height_px - y_margin_px), gray, line_thickness)
+            cv2.line(page, (x_left, y_margin_px), (x_left, page_height_px - y_margin_px), gray_bgr, line_thickness)
             
             # Right edge (creates spacer line) - only draw if not the last column
             if col < tokens_per_row:
                 x_right = x_left + token_size_px
-                cv2.line(page, (x_right, y_margin_px), (x_right, page_height_px - y_margin_px), gray, line_thickness)
+                cv2.line(page, (x_right, y_margin_px), (x_right, page_height_px - y_margin_px), gray_bgr, line_thickness)
                 
                 # Center line of each token (midpoint)
                 x_center = x_left + token_size_px // 2
-                cv2.line(page, (x_center, y_margin_px), (x_center, page_height_px - y_margin_px), gray, line_thickness)
+                cv2.line(page, (x_center, y_margin_px), (x_center, page_height_px - y_margin_px), gray_bgr, line_thickness)
         
         # Draw horizontal grid lines
         for row in range(tokens_per_col + 1):
             # Top edge of each token row
             y_top = y_margin_px + row * (token_size_px + y_spacer_px)
-            cv2.line(page, (x_margin_px, y_top), (page_width_px - x_margin_px, y_top), gray, line_thickness)
+            cv2.line(page, (x_margin_px, y_top), (page_width_px - x_margin_px, y_top), gray_bgr, line_thickness)
             
             # Bottom edge (creates spacer line) - only draw if not the last row
             if row < tokens_per_col:
                 y_bottom = y_top + token_size_px
-                cv2.line(page, (x_margin_px, y_bottom), (page_width_px - x_margin_px, y_bottom), gray, line_thickness)
+                cv2.line(page, (x_margin_px, y_bottom), (page_width_px - x_margin_px, y_bottom), gray_bgr, line_thickness)
                 
                 # Center line of each token (midpoint)
                 y_center = y_top + token_size_px // 2
-                cv2.line(page, (x_margin_px, y_center), (page_width_px - x_margin_px, y_center), gray, line_thickness)
+                cv2.line(page, (x_margin_px, y_center), (page_width_px - x_margin_px, y_center), gray_bgr, line_thickness)
         
         tokens_on_this_page = 0
         
-        # Place tokens on this page
+        # First pass: Fill backgrounds including spacers
+        temp_token_index = token_index
+        for row in range(tokens_per_col):
+            for col in range(tokens_per_row):
+                if temp_token_index >= total_tokens:
+                    break
+                
+                filename = tokens_to_place[temp_token_index]
+                
+                # Calculate position for this token
+                x_pos = x_margin_px + col * (token_size_px + x_spacer_px)
+                y_pos = y_margin_px + row * (token_size_px + y_spacer_px)
+                
+                # Get background color from metadata
+                if filename in metadata_dict:
+                    border_color = metadata_dict[filename]['border_color']
+                    # OpenCV uses BGR format
+                    bg_color = (border_color['b'], border_color['g'], border_color['r'], 255)
+                    
+                    # Fill the token area
+                    page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px] = bg_color
+                    
+                    # Fill left margin extension (for first column)
+                    if col == 0:
+                        margin_bleed = min(x_margin_px, x_spacer_px)
+                        page[y_pos:y_pos+token_size_px, x_pos-margin_bleed:x_pos] = bg_color
+                    
+                    # Fill right margin extension (for last column)
+                    if col == tokens_per_row - 1:
+                        margin_bleed = min(x_margin_px, x_spacer_px)
+                        page[y_pos:y_pos+token_size_px, x_pos+token_size_px:x_pos+token_size_px+margin_bleed] = bg_color
+                    
+                    # Fill top margin extension (for first row)
+                    if row == 0:
+                        margin_bleed = min(y_margin_px, y_spacer_px)
+                        page[y_pos-margin_bleed:y_pos, x_pos:x_pos+token_size_px] = bg_color
+                    
+                    # Fill bottom margin extension (for last row)
+                    if row == tokens_per_col - 1:
+                        margin_bleed = min(y_margin_px, y_spacer_px)
+                        page[y_pos+token_size_px:y_pos+token_size_px+margin_bleed, x_pos:x_pos+token_size_px] = bg_color
+                    
+                    # Fill right spacer (split with next token to the right, or extend current color if last column)
+                    if x_spacer_px > 0:
+                        if col < tokens_per_row - 1:
+                            # Not last column - check for next token
+                            next_index = temp_token_index + 1
+                            if next_index < total_tokens:
+                                next_filename = tokens_to_place[next_index]
+                                if next_filename in metadata_dict:
+                                    next_border_color = metadata_dict[next_filename]['border_color']
+                                    next_bg_color = (next_border_color['b'], next_border_color['g'], next_border_color['r'], 255)
+                                    
+                                    # Split spacer in half
+                                    spacer_start_x = x_pos + token_size_px
+                                    spacer_mid_x = spacer_start_x + x_spacer_px // 2
+                                    spacer_end_x = spacer_start_x + x_spacer_px
+                                    
+                                    # Left half: current token color
+                                    page[y_pos:y_pos+token_size_px, spacer_start_x:spacer_mid_x] = bg_color
+                                    # Right half: next token color
+                                    page[y_pos:y_pos+token_size_px, spacer_mid_x:spacer_end_x] = next_bg_color
+                            else:
+                                # No next token - fill entire spacer with current color
+                                spacer_start_x = x_pos + token_size_px
+                                spacer_end_x = spacer_start_x + x_spacer_px
+                                page[y_pos:y_pos+token_size_px, spacer_start_x:spacer_end_x] = bg_color
+                    
+                    # Fill bottom spacer (split with token below, or extend current color if last row)
+                    if y_spacer_px > 0:
+                        if row < tokens_per_col - 1:
+                            # Not last row - check for token below
+                            next_index = temp_token_index + tokens_per_row
+                            if next_index < total_tokens:
+                                next_filename = tokens_to_place[next_index]
+                                if next_filename in metadata_dict:
+                                    next_border_color = metadata_dict[next_filename]['border_color']
+                                    next_bg_color = (next_border_color['b'], next_border_color['g'], next_border_color['r'], 255)
+                                    
+                                    # Split spacer in half
+                                    spacer_start_y = y_pos + token_size_px
+                                    spacer_mid_y = spacer_start_y + y_spacer_px // 2
+                                    spacer_end_y = spacer_start_y + y_spacer_px
+                                    
+                                    # Top half: current token color
+                                    page[spacer_start_y:spacer_mid_y, x_pos:x_pos+token_size_px] = bg_color
+                                    # Bottom half: next token color
+                                    page[spacer_mid_y:spacer_end_y, x_pos:x_pos+token_size_px] = next_bg_color
+                            else:
+                                # No token below - fill entire spacer with current color
+                                spacer_start_y = y_pos + token_size_px
+                                spacer_end_y = spacer_start_y + y_spacer_px
+                                page[spacer_start_y:spacer_end_y, x_pos:x_pos+token_size_px] = bg_color
+                    
+                    # Fill corner spacer (split 4 ways between diagonal tokens)
+                    if col < tokens_per_row - 1 and row < tokens_per_col - 1 and x_spacer_px > 0 and y_spacer_px > 0:
+                        # Top-left quadrant: current token
+                        spacer_x = x_pos + token_size_px
+                        spacer_y = y_pos + token_size_px
+                        mid_x = spacer_x + x_spacer_px // 2
+                        mid_y = spacer_y + y_spacer_px // 2
+                        
+                        page[spacer_y:mid_y, spacer_x:mid_x] = bg_color
+                        
+                        # Top-right quadrant: token to the right
+                        right_index = temp_token_index + 1
+                        if right_index < total_tokens:
+                            right_filename = tokens_to_place[right_index]
+                            if right_filename in metadata_dict:
+                                right_border_color = metadata_dict[right_filename]['border_color']
+                                right_bg_color = (right_border_color['b'], right_border_color['g'], right_border_color['r'], 255)
+                                page[spacer_y:mid_y, mid_x:spacer_x+x_spacer_px] = right_bg_color
+                        else:
+                            # No token to the right - use current token color
+                            page[spacer_y:mid_y, mid_x:spacer_x+x_spacer_px] = bg_color
+                        
+                        # Bottom-left quadrant: token below
+                        below_index = temp_token_index + tokens_per_row
+                        if below_index < total_tokens:
+                            below_filename = tokens_to_place[below_index]
+                            if below_filename in metadata_dict:
+                                below_border_color = metadata_dict[below_filename]['border_color']
+                                below_bg_color = (below_border_color['b'], below_border_color['g'], below_border_color['r'], 255)
+                                page[mid_y:spacer_y+y_spacer_px, spacer_x:mid_x] = below_bg_color
+                        else:
+                            # No token below - use current token color
+                            page[mid_y:spacer_y+y_spacer_px, spacer_x:mid_x] = bg_color
+                        
+                        # Bottom-right quadrant: token diagonally down-right
+                        diag_index = temp_token_index + tokens_per_row + 1
+                        if diag_index < total_tokens:
+                            diag_filename = tokens_to_place[diag_index]
+                            if diag_filename in metadata_dict:
+                                diag_border_color = metadata_dict[diag_filename]['border_color']
+                                diag_bg_color = (diag_border_color['b'], diag_border_color['g'], diag_border_color['r'], 255)
+                                page[mid_y:spacer_y+y_spacer_px, mid_x:spacer_x+x_spacer_px] = diag_bg_color
+                        else:
+                            # No diagonal token - use current token color
+                            page[mid_y:spacer_y+y_spacer_px, mid_x:spacer_x+x_spacer_px] = bg_color
+                    
+                    # Extend right spacer into right margin (for last column)
+                    if col == tokens_per_row - 1 and y_spacer_px > 0 and row < tokens_per_col - 1:
+                        margin_bleed = min(x_margin_px, x_spacer_px)
+                        spacer_start_y = y_pos + token_size_px
+                        spacer_mid_y = spacer_start_y + y_spacer_px // 2
+                        spacer_end_y = spacer_start_y + y_spacer_px
+                        
+                        # Top half: current token color
+                        page[spacer_start_y:spacer_mid_y, x_pos+token_size_px:x_pos+token_size_px+margin_bleed] = bg_color
+                        
+                        # Bottom half: token below color
+                        below_index = temp_token_index + tokens_per_row
+                        if below_index < total_tokens:
+                            below_filename = tokens_to_place[below_index]
+                            if below_filename in metadata_dict:
+                                below_border_color = metadata_dict[below_filename]['border_color']
+                                below_bg_color = (below_border_color['b'], below_border_color['g'], below_border_color['r'], 255)
+                                page[spacer_mid_y:spacer_end_y, x_pos+token_size_px:x_pos+token_size_px+margin_bleed] = below_bg_color
+                    
+                    # Extend bottom spacer into bottom margin (for last row)
+                    if row == tokens_per_col - 1 and x_spacer_px > 0 and col < tokens_per_row - 1:
+                        margin_bleed = min(y_margin_px, y_spacer_px)
+                        spacer_start_x = x_pos + token_size_px
+                        spacer_mid_x = spacer_start_x + x_spacer_px // 2
+                        spacer_end_x = spacer_start_x + x_spacer_px
+                        
+                        # Left half: current token color
+                        page[y_pos+token_size_px:y_pos+token_size_px+margin_bleed, spacer_start_x:spacer_mid_x] = bg_color
+                        
+                        # Right half: token to the right color
+                        right_index = temp_token_index + 1
+                        if right_index < total_tokens:
+                            right_filename = tokens_to_place[right_index]
+                            if right_filename in metadata_dict:
+                                right_border_color = metadata_dict[right_filename]['border_color']
+                                right_bg_color = (right_border_color['b'], right_border_color['g'], right_border_color['r'], 255)
+                                page[y_pos+token_size_px:y_pos+token_size_px+margin_bleed, spacer_mid_x:spacer_end_x] = right_bg_color
+                    
+                    # Fill corner margin areas (4-way split at corner intersections)
+                    # Bottom-right corner margin
+                    if col == tokens_per_row - 1 and row == tokens_per_col - 1:
+                        margin_bleed_x = min(x_margin_px, x_spacer_px)
+                        margin_bleed_y = min(y_margin_px, y_spacer_px)
+                        corner_x = x_pos + token_size_px
+                        corner_y = y_pos + token_size_px
+                        page[corner_y:corner_y+margin_bleed_y, corner_x:corner_x+margin_bleed_x] = bg_color
+                
+                temp_token_index += 1
+            
+            if temp_token_index >= total_tokens:
+                break
+        
+        # Draw black grid outline lines (bisecting spacers) - after backgrounds, before tokens
+        for col in range(tokens_per_row + 1):
+            # Grid line position (bisects the spacer between tokens)
+            x_grid = x_margin_px + col * (token_size_px + x_spacer_px) + token_size_px + x_spacer_px // 2
+            if col < tokens_per_row:  # Don't draw past the last column
+                cv2.line(page, (x_grid, y_margin_px), (x_grid, page_height_px - y_margin_px), black_bgr, line_thickness)
+        
+        for row in range(tokens_per_col + 1):
+            # Grid line position (bisects the spacer between tokens)
+            y_grid = y_margin_px + row * (token_size_px + y_spacer_px) + token_size_px + y_spacer_px // 2
+            if row < tokens_per_col:  # Don't draw past the last row
+                cv2.line(page, (x_margin_px, y_grid), (page_width_px - x_margin_px, y_grid), black_bgr, line_thickness)
+        
+        # Second pass: Place tokens on top of the colored backgrounds
         for row in range(tokens_per_col):
             for col in range(tokens_per_row):
                 if token_index >= total_tokens:
@@ -236,13 +442,6 @@ def create_print_layout(template, output_base_path, metadata_path):
                 # Calculate position for this token
                 x_pos = x_margin_px + col * (token_size_px + x_spacer_px)
                 y_pos = y_margin_px + row * (token_size_px + y_spacer_px)
-                
-                # Fill background with border color from metadata
-                if filename in metadata_dict:
-                    border_color = metadata_dict[filename]['border_color']
-                    # OpenCV uses BGR format
-                    bg_color = (border_color['b'], border_color['g'], border_color['r'], 255)
-                    page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px] = bg_color
                 
                 # Load token image
                 token_img = cv2.imread(str(token_path), cv2.IMREAD_UNCHANGED)
