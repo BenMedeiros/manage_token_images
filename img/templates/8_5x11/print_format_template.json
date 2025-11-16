@@ -8,9 +8,7 @@
     "y_spacer": 0.15,
     "token_size": 1.0,
     "ppi": [
-      200,
       300,
-      400,
       600
     ],
     "calculated": {
@@ -61,6 +59,14 @@
     {
       "filename": "wall.png",
       "quantity": 2
+    },
+    {
+      "filename": "zombie_active.png",
+      "quantity": 1
+    },
+    {
+      "filename": "zombie_dead.png",
+      "quantity": 1
     }
   ]
 }

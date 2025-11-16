@@ -3,134 +3,183 @@
     "filename": "dungeonrush_cover1.png",
     "xsize": 1024,
     "ysize": 1024,
-    "xpos": 511.6,
-    "ypos": 511.4,
-    "diameter": 814.9,
-    "circularity": 0.9,
+    "xpos": 511.5,
+    "ypos": 511.0,
+    "diameter": 808.5,
+    "circularity": 0.899,
     "aspect_ratio": 1.004,
-    "major_axis": 814.1,
-    "minor_axis": 811.1,
-    "ellipse_angle": 90.5,
+    "major_axis": 807.4,
+    "minor_axis": 804.3,
+    "ellipse_angle": 90.6,
     "border_color": {
-      "r": 48,
-      "g": 48,
-      "b": 48,
-      "hex": "#303030"
-    }
+      "r": 155,
+      "g": 155,
+      "b": 155,
+      "hex": "#9b9b9b"
+    },
+    "border_color_3px": {
+      "r": 87,
+      "g": 87,
+      "b": 87,
+      "hex": "#575757"
+    },
+    "border_thickness": 1
   },
   {
     "filename": "dungeonrush_cover2.png",
     "xsize": 1024,
     "ysize": 1024,
     "xpos": 511.4,
-    "ypos": 511.4,
-    "diameter": 814.8,
+    "ypos": 511.0,
+    "diameter": 808.4,
     "circularity": 0.899,
     "aspect_ratio": 1.004,
-    "major_axis": 814.1,
-    "minor_axis": 811.1,
-    "ellipse_angle": 90.4,
+    "major_axis": 807.3,
+    "minor_axis": 804.4,
+    "ellipse_angle": 90.7,
     "border_color": {
-      "r": 50,
-      "g": 49,
-      "b": 49,
-      "hex": "#323131"
-    }
+      "r": 156,
+      "g": 156,
+      "b": 156,
+      "hex": "#9c9c9c"
+    },
+    "border_color_3px": {
+      "r": 88,
+      "g": 88,
+      "b": 88,
+      "hex": "#585858"
+    },
+    "border_thickness": 1
   },
   {
     "filename": "empty.png",
     "xsize": 1024,
     "ysize": 1024,
-    "xpos": 515.8,
-    "ypos": 508.2,
-    "diameter": 811.9,
-    "circularity": 0.9,
+    "xpos": 515.6,
+    "ypos": 508.0,
+    "diameter": 804.6,
+    "circularity": 0.898,
     "aspect_ratio": 1.001,
-    "major_axis": 809.6,
-    "minor_axis": 808.7,
-    "ellipse_angle": 63.8,
+    "major_axis": 802.9,
+    "minor_axis": 802.0,
+    "ellipse_angle": 63.5,
     "border_color": {
-      "r": 45,
-      "g": 45,
-      "b": 45,
-      "hex": "#2d2d2d"
-    }
+      "r": 153,
+      "g": 153,
+      "b": 153,
+      "hex": "#999999"
+    },
+    "border_color_3px": {
+      "r": 85,
+      "g": 85,
+      "b": 85,
+      "hex": "#555555"
+    },
+    "border_thickness": 1
   },
   {
     "filename": "trap_bomb.png",
     "xsize": 1024,
     "ysize": 1024,
-    "xpos": 515.0,
-    "ypos": 509.6,
-    "diameter": 812.9,
-    "circularity": 0.899,
+    "xpos": 515.3,
+    "ypos": 509.9,
+    "diameter": 805.6,
+    "circularity": 0.898,
     "aspect_ratio": 1.001,
-    "major_axis": 810.8,
-    "minor_axis": 810.1,
-    "ellipse_angle": 15.9,
+    "major_axis": 804.1,
+    "minor_axis": 803.3,
+    "ellipse_angle": 16.5,
     "border_color": {
-      "r": 47,
-      "g": 47,
-      "b": 47,
-      "hex": "#2f2f2f"
-    }
+      "r": 153,
+      "g": 153,
+      "b": 153,
+      "hex": "#999999"
+    },
+    "border_color_3px": {
+      "r": 86,
+      "g": 86,
+      "b": 86,
+      "hex": "#565656"
+    },
+    "border_thickness": 1
   },
   {
     "filename": "trap_cage.png",
     "xsize": 1024,
     "ysize": 1024,
-    "xpos": 511.6,
-    "ypos": 511.7,
-    "diameter": 818.8,
+    "xpos": 511.7,
+    "ypos": 511.6,
+    "diameter": 811.6,
     "circularity": 0.899,
     "aspect_ratio": 1.001,
-    "major_axis": 816.9,
-    "minor_axis": 816.1,
-    "ellipse_angle": 94.9,
+    "major_axis": 810.2,
+    "minor_axis": 809.3,
+    "ellipse_angle": 96.7,
     "border_color": {
-      "r": 51,
-      "g": 51,
-      "b": 51,
-      "hex": "#333333"
-    }
+      "r": 158,
+      "g": 158,
+      "b": 157,
+      "hex": "#9e9e9d"
+    },
+    "border_color_3px": {
+      "r": 90,
+      "g": 90,
+      "b": 89,
+      "hex": "#5a5a59"
+    },
+    "border_thickness": 1
   },
   {
     "filename": "trap_oilslick.png",
     "xsize": 1024,
     "ysize": 1024,
-    "xpos": 514.1,
-    "ypos": 511.3,
-    "diameter": 811.9,
-    "circularity": 0.9,
+    "xpos": 513.9,
+    "ypos": 511.4,
+    "diameter": 804.7,
+    "circularity": 0.899,
     "aspect_ratio": 1.001,
-    "major_axis": 810.1,
-    "minor_axis": 809.0,
-    "ellipse_angle": 100.3,
+    "major_axis": 803.3,
+    "minor_axis": 802.3,
+    "ellipse_angle": 100.8,
     "border_color": {
-      "r": 48,
-      "g": 48,
-      "b": 48,
-      "hex": "#303030"
-    }
+      "r": 154,
+      "g": 154,
+      "b": 154,
+      "hex": "#9a9a9a"
+    },
+    "border_color_3px": {
+      "r": 87,
+      "g": 87,
+      "b": 87,
+      "hex": "#575757"
+    },
+    "border_thickness": 1
   },
   {
     "filename": "trap_pushback.png",
     "xsize": 1024,
     "ysize": 1024,
-    "xpos": 511.6,
-    "ypos": 513.2,
-    "diameter": 814.6,
-    "circularity": 0.899,
+    "xpos": 511.5,
+    "ypos": 513.3,
+    "diameter": 807.5,
+    "circularity": 0.898,
     "aspect_ratio": 1.005,
-    "major_axis": 813.3,
-    "minor_axis": 809.3,
-    "ellipse_angle": 92.4,
+    "major_axis": 806.6,
+    "minor_axis": 802.6,
+    "ellipse_angle": 92.9,
     "border_color": {
-      "r": 50,
-      "g": 50,
-      "b": 50,
-      "hex": "#323232"
-    }
+      "r": 158,
+      "g": 158,
+      "b": 158,
+      "hex": "#9e9e9e"
+    },
+    "border_color_3px": {
+      "r": 90,
+      "g": 89,
+      "b": 89,
+      "hex": "#5a5959"
+    },
+    "border_thickness": 1
   },
   {
     "filename": "trap_spikes.png",
@@ -138,18 +187,25 @@
     "ysize": 1024,
     "xpos": 511.5,
     "ypos": 511.6,
-    "diameter": 780.9,
+    "diameter": 773.6,
     "circularity": 0.9,
     "aspect_ratio": 1.001,
-    "major_axis": 779.3,
-    "minor_axis": 778.8,
-    "ellipse_angle": 102.6,
+    "major_axis": 772.6,
+    "minor_axis": 772.0,
+    "ellipse_angle": 104.6,
     "border_color": {
-      "r": 50,
-      "g": 50,
-      "b": 49,
-      "hex": "#323231"
-    }
+      "r": 157,
+      "g": 157,
+      "b": 157,
+      "hex": "#9d9d9d"
+    },
+    "border_color_3px": {
+      "r": 89,
+      "g": 89,
+      "b": 88,
+      "hex": "#595958"
+    },
+    "border_thickness": 1
   },
   {
     "filename": "treasure.png",
@@ -157,36 +213,102 @@
     "ysize": 1024,
     "xpos": 511.7,
     "ypos": 512.3,
-    "diameter": 818.7,
+    "diameter": 811.3,
     "circularity": 0.899,
     "aspect_ratio": 1.002,
-    "major_axis": 816.6,
-    "minor_axis": 815.4,
-    "ellipse_angle": 11.7,
+    "major_axis": 810.0,
+    "minor_axis": 808.7,
+    "ellipse_angle": 11.6,
     "border_color": {
-      "r": 49,
-      "g": 49,
-      "b": 49,
-      "hex": "#313131"
-    }
+      "r": 157,
+      "g": 157,
+      "b": 157,
+      "hex": "#9d9d9d"
+    },
+    "border_color_3px": {
+      "r": 89,
+      "g": 89,
+      "b": 89,
+      "hex": "#595959"
+    },
+    "border_thickness": 1
   },
   {
     "filename": "wall.png",
     "xsize": 1024,
     "ysize": 1024,
     "xpos": 513.2,
-    "ypos": 510.5,
-    "diameter": 816.2,
+    "ypos": 510.6,
+    "diameter": 808.9,
     "circularity": 0.899,
     "aspect_ratio": 1.001,
-    "major_axis": 814.0,
-    "minor_axis": 812.9,
-    "ellipse_angle": 69.0,
+    "major_axis": 807.2,
+    "minor_axis": 806.2,
+    "ellipse_angle": 68.4,
     "border_color": {
-      "r": 49,
-      "g": 49,
-      "b": 49,
-      "hex": "#313131"
-    }
+      "r": 156,
+      "g": 156,
+      "b": 155,
+      "hex": "#9c9c9b"
+    },
+    "border_color_3px": {
+      "r": 88,
+      "g": 88,
+      "b": 88,
+      "hex": "#585858"
+    },
+    "border_thickness": 1
+  },
+  {
+    "filename": "zombie_active.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.2,
+    "ypos": 510.7,
+    "diameter": 1030.9,
+    "circularity": 0.838,
+    "aspect_ratio": 1.0,
+    "major_axis": 1021.9,
+    "minor_axis": 1021.5,
+    "ellipse_angle": 133.2,
+    "border_color": {
+      "r": 56,
+      "g": 45,
+      "b": 30,
+      "hex": "#382d1e"
+    },
+    "border_color_3px": {
+      "r": 99,
+      "g": 80,
+      "b": 54,
+      "hex": "#635036"
+    },
+    "border_thickness": 1
+  },
+  {
+    "filename": "zombie_dead.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.5,
+    "ypos": 510.8,
+    "diameter": 1030.9,
+    "circularity": 0.837,
+    "aspect_ratio": 1.001,
+    "major_axis": 1022.1,
+    "minor_axis": 1021.0,
+    "ellipse_angle": 103.8,
+    "border_color": {
+      "r": 55,
+      "g": 45,
+      "b": 30,
+      "hex": "#372d1e"
+    },
+    "border_color_3px": {
+      "r": 96,
+      "g": 78,
+      "b": 54,
+      "hex": "#604e36"
+    },
+    "border_thickness": 1
   }
 ]

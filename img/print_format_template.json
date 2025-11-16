@@ -52,6 +52,14 @@
     {
       "filename": "wall.png",
       "quantity": 1
+    },
+    {
+      "filename": "zombie_active.png",
+      "quantity": 1
+    },
+    {
+      "filename": "zombie_dead.png",
+      "quantity": 1
     }
   ]
 }

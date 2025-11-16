@@ -152,8 +152,9 @@ def create_print_layout(template, output_base_path, metadata_path):
     
     tokens_per_page = tokens_per_row * tokens_per_col
     
-    # Get img folder path (assume template is in img folder)
-    img_folder = Path(output_base_path).parent / "output"
+    # Get img folder path - tokens are always in img/output regardless of where template is
+    script_dir = Path(__file__).parent
+    img_folder = script_dir / "img" / "output"
     
     # Build list of tokens to place (respecting quantities)
     tokens_to_place = []
@@ -548,41 +549,67 @@ def add_ppi_metadata(output_path, ppi):
 if __name__ == "__main__":
     # Get paths
     script_dir = Path(__file__).parent
-    template_path = script_dir / "img" / "print_format_template.json"
+    templates_dir = script_dir / "img" / "templates"
     metadata_path = script_dir / "img" / "image_metadata.json"
     
-    if not template_path.exists():
-        print(f"Error: Template not found at {template_path}")
-        print("Please run process_tokens.py first to generate the template.")
-    elif not metadata_path.exists():
+    if not metadata_path.exists():
         print(f"Error: Metadata not found at {metadata_path}")
         print("Please run process_tokens.py first to generate the metadata.")
+    elif not templates_dir.exists():
+        print(f"Error: Templates folder not found at {templates_dir}")
+        print("Please create img/templates/ and add template folders with print_format_template.json files.")
     else:
-        # Update template with calculations
-        template = update_template_calculations(template_path)
+        # Find all template folders
+        template_folders = [f for f in templates_dir.iterdir() if f.is_dir()]
         
-        settings = template['settings']
-        width = settings['print_width']
-        height = settings['print_height']
-        ppi_setting = settings['ppi']
-        
-        # Handle ppi as either a single value or array
-        ppi_values = ppi_setting if isinstance(ppi_setting, list) else [ppi_setting]
-        
-        # Generate layout for each PPI value
-        for ppi in ppi_values:
-            print(f"\n{'='*50}")
-            print(f"Generating layout at {ppi} PPI")
-            print(f"{'='*50}")
+        if not template_folders:
+            print(f"Error: No template folders found in {templates_dir}")
+            print("Please create folders with print_format_template.json files.")
+        else:
+            print(f"Found {len(template_folders)} template folder(s)")
+            print("=" * 50)
             
-            # Update settings with current PPI
-            settings['ppi'] = ppi
-            
-            # Create output filename with dimensions and PPI (replace decimal points)
-            width_str = str(width).replace('.', '_')
-            height_str = str(height).replace('.', '_')
-            output_filename = f"output_{width_str}x{height_str}_{ppi}ppi.png"
-            output_path = script_dir / "img" / output_filename
-            
-            # Generate the layout
-            create_print_layout(template, output_path, metadata_path)
+            # Process each template folder
+            for template_folder in template_folders:
+                template_path = template_folder / "print_format_template.json"
+                
+                if not template_path.exists():
+                    print(f"\nSkipping {template_folder.name}: No print_format_template.json found")
+                    continue
+                
+                print(f"\n{'#'*50}")
+                print(f"# START: Processing template '{template_folder.name}'")
+                print(f"{'#'*50}")
+                
+                # Update template with calculations
+                template = update_template_calculations(template_path)
+                
+                settings = template['settings']
+                width = settings['print_width']
+                height = settings['print_height']
+                ppi_setting = settings['ppi']
+                
+                # Handle ppi as either a single value or array
+                ppi_values = ppi_setting if isinstance(ppi_setting, list) else [ppi_setting]
+                
+                # Generate layout for each PPI value
+                for ppi in ppi_values:
+                    print(f"\n{'='*50}")
+                    print(f"Generating layout at {ppi} PPI")
+                    print(f"{'='*50}")
+                    
+                    # Update settings with current PPI
+                    settings['ppi'] = ppi
+                    
+                    # Create output filename with dimensions and PPI (replace decimal points)
+                    width_str = str(width).replace('.', '_')
+                    height_str = str(height).replace('.', '_')
+                    output_filename = f"output_{width_str}x{height_str}_{ppi}ppi.png"
+                    output_path = template_folder / output_filename
+                    
+                    # Generate the layout
+                    create_print_layout(template, output_path, metadata_path)
+                
+                print(f"\n{'#'*50}")
+                print(f"# COMPLETE: Template '{template_folder.name}'")
+                print(f"{'#'*50}")

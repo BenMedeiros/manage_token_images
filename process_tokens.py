@@ -16,6 +16,7 @@ from pathlib import Path
 def find_circular_mask(image):
     """
     Detect the circular token in the image and create a mask.
+    Uses color-based detection to find background, then refines with edge detection.
     
     Args:
         image: BGR image from cv2
@@ -23,24 +24,39 @@ def find_circular_mask(image):
     Returns:
         tuple: (mask, circle_info) where mask is binary and circle_info contains {x, y, radius}
     """
-    # Convert to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    height, width = image.shape[:2]
     
-    # Apply Gaussian blur to reduce noise
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    # Sample corner pixels to determine background color
+    # Average the four corners (assumed to be background)
+    corner_size = 20
+    corners = [
+        image[0:corner_size, 0:corner_size],  # Top-left
+        image[0:corner_size, width-corner_size:width],  # Top-right
+        image[height-corner_size:height, 0:corner_size],  # Bottom-left
+        image[height-corner_size:height, width-corner_size:width]  # Bottom-right
+    ]
     
-    # Use Canny edge detection to find strong edges
-    edges = cv2.Canny(blurred, 50, 150)
+    corner_pixels = np.vstack([c.reshape(-1, 3) for c in corners])
+    bg_color = corner_pixels.mean(axis=0)
     
-    # Dilate edges to connect nearby contours
-    kernel = np.ones((3, 3), np.uint8)
-    dilated = cv2.dilate(edges, kernel, iterations=2)
+    # Calculate color difference from background
+    color_diff = np.sqrt(np.sum((image.astype(float) - bg_color) ** 2, axis=2))
     
-    # Find contours
-    contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Threshold to create initial mask (anything significantly different from background)
+    # Use adaptive threshold based on color variance
+    threshold = max(30, color_diff.std() * 1.5)
+    mask = (color_diff > threshold).astype(np.uint8) * 255
     
-    # Create mask
-    mask = np.zeros(gray.shape, dtype=np.uint8)
+    # Clean up the mask with morphological operations
+    kernel = np.ones((5, 5), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
+    
+    # Find contours on the color-based mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Create final mask
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)
     circle_info = None
     
     if contours:
@@ -86,10 +102,9 @@ def find_circular_mask(image):
         # Fill the contour on mask
         cv2.drawContours(mask, [largest_contour], -1, 255, -1)
         
-        # Erode the mask to remove background edge pixels
-        # Increase iterations to remove more edge pixels
-        erode_kernel = np.ones((3, 3), np.uint8)
-        mask = cv2.erode(mask, erode_kernel, iterations=5)
+        # Apply minimal smoothing to the mask edges
+        mask = cv2.GaussianBlur(mask, (3, 3), 0)
+        _, mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
     
     return mask, circle_info
 
@@ -144,6 +159,58 @@ def remove_background(image_path, output_path):
     else:
         avg_color_rgb = {'r': 0, 'g': 0, 'b': 0, 'hex': '#000000'}
     
+    # Calculate border color at 3px depth from edge
+    # Erode mask by 3 pixels to get inner ring
+    erode_3px_kernel = np.ones((3, 3), np.uint8)
+    inner_mask_3px = cv2.erode(mask, erode_3px_kernel, iterations=3)
+    ring_3px = cv2.subtract(mask, inner_mask_3px)
+    
+    # Get pixels in the 3px depth ring
+    ring_3px_pixels = img[ring_3px > 0]
+    
+    if len(ring_3px_pixels) > 0:
+        avg_color_3px_bgr = ring_3px_pixels.mean(axis=0)
+        border_color_3px = {
+            'r': int(avg_color_3px_bgr[2]),
+            'g': int(avg_color_3px_bgr[1]),
+            'b': int(avg_color_3px_bgr[0]),
+            'hex': f"#{int(avg_color_3px_bgr[2]):02x}{int(avg_color_3px_bgr[1]):02x}{int(avg_color_3px_bgr[0]):02x}"
+        }
+    else:
+        border_color_3px = avg_color_rgb.copy()
+    
+    # Detect border thickness by analyzing color gradient from edge inward
+    # Sample at multiple depths and find where color significantly changes
+    border_thickness = 0
+    if circle_info and len(outer_pixels) > 0:
+        max_sample_depth = 20  # Maximum depth to sample
+        color_threshold = 15  # RGB color difference threshold
+        
+        reference_color = avg_color_bgr
+        
+        for depth in range(1, max_sample_depth + 1):
+            # Create ring at this depth
+            inner_mask_at_depth = cv2.erode(mask, erode_3px_kernel, iterations=depth)
+            ring_at_depth = cv2.subtract(mask, inner_mask_at_depth)
+            
+            if ring_at_depth.sum() == 0:
+                break
+            
+            depth_pixels = img[ring_at_depth > 0]
+            if len(depth_pixels) > 0:
+                depth_color = depth_pixels.mean(axis=0)
+                
+                # Calculate color difference
+                color_diff = np.sqrt(np.sum((depth_color - reference_color) ** 2))
+                
+                if color_diff > color_threshold:
+                    border_thickness = depth
+                    break
+        
+        # If no significant change detected, assume thin border
+        if border_thickness == 0:
+            border_thickness = 3
+    
     # Convert image to RGBA
     img_rgba = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
     
@@ -168,7 +235,9 @@ def remove_background(image_path, output_path):
         'major_axis': round(ellipse['major_axis'], 1) if ellipse else 0,
         'minor_axis': round(ellipse['minor_axis'], 1) if ellipse else 0,
         'ellipse_angle': round(ellipse['angle'], 1) if ellipse else 0,
-        'border_color': avg_color_rgb
+        'border_color': avg_color_rgb,
+        'border_color_3px': border_color_3px,
+        'border_thickness': border_thickness
     }
     
     return metadata
