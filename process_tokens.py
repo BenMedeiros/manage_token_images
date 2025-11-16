@@ -246,6 +246,7 @@ def remove_background(image_path, output_path):
 def process_all_images(input_folder="img/input", output_subfolder="img/output"):
     """
     Process all images in the input folder and save to output folder.
+    Supports both direct images and images in subfolders.
     
     Args:
         input_folder: Folder containing input images
@@ -262,11 +263,18 @@ def process_all_images(input_folder="img/input", output_subfolder="img/output"):
     # Supported image extensions
     image_extensions = {'.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.tif'}
     
-    # Find all images in input folder
-    image_files = [
-        f for f in input_path.iterdir()
-        if f.is_file() and f.suffix.lower() in image_extensions
-    ]
+    # Find all images - only in subfolders, not root
+    image_files = []
+    
+    # Process only subfolders in input folder
+    for item in input_path.iterdir():
+        if item.is_dir():
+            # Process subfolder
+            subfolder_output = output_path / item.name
+            subfolder_output.mkdir(parents=True, exist_ok=True)
+            for sub_item in item.iterdir():
+                if sub_item.is_file() and sub_item.suffix.lower() in image_extensions:
+                    image_files.append((sub_item, subfolder_output))
     
     if not image_files:
         print(f"No images found in {input_path}")
@@ -278,12 +286,15 @@ def process_all_images(input_folder="img/input", output_subfolder="img/output"):
     # Process each image and collect metadata
     image_metadata = []
     success_count = 0
-    for image_file in image_files:
+    for image_file, output_folder in image_files:
         # Create output filename with .png extension (to support transparency)
-        output_file = output_path / f"{image_file.stem}.png"
+        output_file = output_folder / f"{image_file.stem}.png"
         
         metadata = remove_background(image_file, output_file)
         if metadata:
+            # Add subfolder info to metadata if in a subfolder
+            if output_folder != output_path:
+                metadata['subfolder'] = output_folder.name
             image_metadata.append(metadata)
             success_count += 1
     
@@ -309,7 +320,11 @@ def process_all_images(input_folder="img/input", output_subfolder="img/output"):
                 "ppi": [300, 600]
             },
             "tokens_quantity_list": [
-                {"filename": meta["filename"], "quantity": 1}
+                {
+                    "filename": meta["filename"], 
+                    "quantity": 1,
+                    **({'subfolder': meta['subfolder']} if 'subfolder' in meta else {})
+                }
                 for meta in image_metadata
             ]
         }

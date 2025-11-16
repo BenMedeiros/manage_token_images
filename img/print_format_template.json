@@ -15,51 +15,83 @@
   "tokens_quantity_list": [
     {
       "filename": "dungeonrush_cover1.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
     },
     {
       "filename": "dungeonrush_cover2.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
     },
     {
       "filename": "empty.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
     },
     {
       "filename": "trap_bomb.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
     },
     {
       "filename": "trap_cage.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
     },
     {
       "filename": "trap_oilslick.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
     },
     {
       "filename": "trap_pushback.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
     },
     {
       "filename": "trap_spikes.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
     },
     {
       "filename": "treasure.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
     },
     {
       "filename": "wall.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush"
+    },
+    {
+      "filename": "quantum_gobblet_l.png",
+      "quantity": 1,
+      "subfolder": "quantumgobblet"
+    },
+    {
+      "filename": "quantum_gobblet_m.png",
+      "quantity": 1,
+      "subfolder": "quantumgobblet"
+    },
+    {
+      "filename": "quantum_gobblet_s.png",
+      "quantity": 1,
+      "subfolder": "quantumgobblet"
+    },
+    {
+      "filename": "quantum_gobblet_xl.png",
+      "quantity": 1,
+      "subfolder": "quantumgobblet"
     },
     {
       "filename": "zombie_active.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "zombie"
     },
     {
       "filename": "zombie_dead.png",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "zombie"
     }
   ]
 }

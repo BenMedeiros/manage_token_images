@@ -23,7 +23,8 @@
       "b": 87,
       "hex": "#575757"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
   },
   {
     "filename": "dungeonrush_cover2.png",
@@ -49,7 +50,8 @@
       "b": 88,
       "hex": "#585858"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
   },
   {
     "filename": "empty.png",
@@ -75,7 +77,8 @@
       "b": 85,
       "hex": "#555555"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
   },
   {
     "filename": "trap_bomb.png",
@@ -101,7 +104,8 @@
       "b": 86,
       "hex": "#565656"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
   },
   {
     "filename": "trap_cage.png",
@@ -127,7 +131,8 @@
       "b": 89,
       "hex": "#5a5a59"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
   },
   {
     "filename": "trap_oilslick.png",
@@ -153,7 +158,8 @@
       "b": 87,
       "hex": "#575757"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
   },
   {
     "filename": "trap_pushback.png",
@@ -179,7 +185,8 @@
       "b": 89,
       "hex": "#5a5959"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
   },
   {
     "filename": "trap_spikes.png",
@@ -205,7 +212,8 @@
       "b": 88,
       "hex": "#595958"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
   },
   {
     "filename": "treasure.png",
@@ -231,7 +239,8 @@
       "b": 89,
       "hex": "#595959"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
   },
   {
     "filename": "wall.png",
@@ -257,7 +266,116 @@
       "b": 88,
       "hex": "#585858"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "dungeonrush"
+  },
+  {
+    "filename": "quantum_gobblet_l.png",
+    "xsize": 412,
+    "ysize": 419,
+    "xpos": 208.4,
+    "ypos": 206.6,
+    "diameter": 372.0,
+    "circularity": 0.898,
+    "aspect_ratio": 1.001,
+    "major_axis": 370.8,
+    "minor_axis": 370.2,
+    "ellipse_angle": 31.7,
+    "border_color": {
+      "r": 115,
+      "g": 45,
+      "b": 117,
+      "hex": "#732d75"
+    },
+    "border_color_3px": {
+      "r": 176,
+      "g": 60,
+      "b": 168,
+      "hex": "#b03ca8"
+    },
+    "border_thickness": 1,
+    "subfolder": "quantumgobblet"
+  },
+  {
+    "filename": "quantum_gobblet_m.png",
+    "xsize": 413,
+    "ysize": 395,
+    "xpos": 192.5,
+    "ypos": 199.5,
+    "diameter": 397.0,
+    "circularity": 0.829,
+    "aspect_ratio": 1.012,
+    "major_axis": 371.5,
+    "minor_axis": 367.1,
+    "ellipse_angle": 84.6,
+    "border_color": {
+      "r": 31,
+      "g": 126,
+      "b": 69,
+      "hex": "#1f7e45"
+    },
+    "border_color_3px": {
+      "r": 40,
+      "g": 187,
+      "b": 94,
+      "hex": "#28bb5e"
+    },
+    "border_thickness": 1,
+    "subfolder": "quantumgobblet"
+  },
+  {
+    "filename": "quantum_gobblet_s.png",
+    "xsize": 423,
+    "ysize": 413,
+    "xpos": 219.4,
+    "ypos": 201.1,
+    "diameter": 375.5,
+    "circularity": 0.892,
+    "aspect_ratio": 1.003,
+    "major_axis": 369.4,
+    "minor_axis": 368.4,
+    "ellipse_angle": 96.9,
+    "border_color": {
+      "r": 22,
+      "g": 106,
+      "b": 129,
+      "hex": "#166a81"
+    },
+    "border_color_3px": {
+      "r": 29,
+      "g": 162,
+      "b": 185,
+      "hex": "#1da2b9"
+    },
+    "border_thickness": 1,
+    "subfolder": "quantumgobblet"
+  },
+  {
+    "filename": "quantum_gobblet_xl.png",
+    "xsize": 421,
+    "ysize": 402,
+    "xpos": 200.0,
+    "ypos": 202.5,
+    "diameter": 392.3,
+    "circularity": 0.839,
+    "aspect_ratio": 1.003,
+    "major_axis": 370.4,
+    "minor_axis": 369.2,
+    "ellipse_angle": 103.9,
+    "border_color": {
+      "r": 122,
+      "g": 103,
+      "b": 68,
+      "hex": "#7a6744"
+    },
+    "border_color_3px": {
+      "r": 181,
+      "g": 152,
+      "b": 91,
+      "hex": "#b5985b"
+    },
+    "border_thickness": 1,
+    "subfolder": "quantumgobblet"
   },
   {
     "filename": "zombie_active.png",
@@ -283,7 +401,8 @@
       "b": 54,
       "hex": "#635036"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "zombie"
   },
   {
     "filename": "zombie_dead.png",
@@ -309,6 +428,7 @@
       "b": 54,
       "hex": "#604e36"
     },
-    "border_thickness": 1
+    "border_thickness": 1,
+    "subfolder": "zombie"
   }
 ]

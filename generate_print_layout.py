@@ -68,6 +68,15 @@ def update_template_calculations(template_path):
     used_height = 2 * y_margin + tokens_per_col * token_size + (tokens_per_col - 1) * y_spacer
     wasted_y = settings['print_height'] - used_height
     
+    # Calculate token counts
+    total_tokens = sum(item['quantity'] for item in template['tokens_quantity_list'])
+    tokens_per_page = tokens_per_row * tokens_per_col
+    pages_needed = (total_tokens + tokens_per_page - 1) // tokens_per_page
+    
+    # Calculate wasted token slots on last page
+    total_slots = pages_needed * tokens_per_page
+    wasted_tokens = total_slots - total_tokens
+    
     # Add calculated values
     if 'calculated' not in settings:
         settings['calculated'] = {}
@@ -75,6 +84,8 @@ def update_template_calculations(template_path):
     settings['calculated']['tokens_per_row'] = tokens_per_row
     settings['calculated']['tokens_per_col'] = tokens_per_col
     settings['calculated']['tokens_per_page'] = tokens_per_row * tokens_per_col
+    settings['calculated']['total_tokens'] = total_tokens
+    settings['calculated']['wasted_tokens'] = wasted_tokens
     settings['calculated']['wasted_x'] = round(wasted_x, 3)
     settings['calculated']['wasted_y'] = round(wasted_y, 3)
     
@@ -86,11 +97,6 @@ def update_template_calculations(template_path):
     print(f"Tokens per row: {tokens_per_row}")
     print(f"Tokens per column: {tokens_per_col}")
     print(f"Total tokens per page: {tokens_per_row * tokens_per_col}")
-    
-    total_tokens = sum(item['quantity'] for item in template['tokens_quantity_list'])
-    tokens_per_page = tokens_per_row * tokens_per_col
-    pages_needed = (total_tokens + tokens_per_page - 1) // tokens_per_page
-    
     print(f"Total tokens to print: {total_tokens}")
     print(f"Pages needed: {pages_needed}")
     print("-" * 50)
@@ -156,13 +162,14 @@ def create_print_layout(template, output_base_path, metadata_path):
     script_dir = Path(__file__).parent
     img_folder = script_dir / "img" / "output"
     
-    # Build list of tokens to place (respecting quantities)
+    # Build list of tokens to place (respecting quantities and subfolders)
     tokens_to_place = []
     for item in tokens_list:
         filename = item['filename']
+        subfolder = item.get('subfolder')  # Optional subfolder field
         quantity = item['quantity']
         for _ in range(quantity):
-            tokens_to_place.append(filename)
+            tokens_to_place.append({'filename': filename, 'subfolder': subfolder})
     
     total_tokens = len(tokens_to_place)
     pages_needed = (total_tokens + tokens_per_page - 1) // tokens_per_page
@@ -233,7 +240,9 @@ def create_print_layout(template, output_base_path, metadata_path):
                 if temp_token_index >= total_tokens:
                     break
                 
-                filename = tokens_to_place[temp_token_index]
+                token_info = tokens_to_place[temp_token_index]
+                filename = token_info['filename']
+                subfolder = token_info['subfolder']
                 
                 # Calculate position for this token
                 x_pos = x_margin_px + col * (token_size_px + x_spacer_px)
@@ -274,7 +283,7 @@ def create_print_layout(template, output_base_path, metadata_path):
                             # Not last column - check for next token
                             next_index = temp_token_index + 1
                             if next_index < total_tokens:
-                                next_filename = tokens_to_place[next_index]
+                                next_filename = tokens_to_place[next_index]['filename']
                                 if next_filename in metadata_dict:
                                     next_border_color = metadata_dict[next_filename]['border_color']
                                     next_bg_color = (next_border_color['b'], next_border_color['g'], next_border_color['r'], 255)
@@ -300,7 +309,7 @@ def create_print_layout(template, output_base_path, metadata_path):
                             # Not last row - check for token below
                             next_index = temp_token_index + tokens_per_row
                             if next_index < total_tokens:
-                                next_filename = tokens_to_place[next_index]
+                                next_filename = tokens_to_place[next_index]['filename']
                                 if next_filename in metadata_dict:
                                     next_border_color = metadata_dict[next_filename]['border_color']
                                     next_bg_color = (next_border_color['b'], next_border_color['g'], next_border_color['r'], 255)
@@ -333,7 +342,7 @@ def create_print_layout(template, output_base_path, metadata_path):
                         # Top-right quadrant: token to the right
                         right_index = temp_token_index + 1
                         if right_index < total_tokens:
-                            right_filename = tokens_to_place[right_index]
+                            right_filename = tokens_to_place[right_index]['filename']
                             if right_filename in metadata_dict:
                                 right_border_color = metadata_dict[right_filename]['border_color']
                                 right_bg_color = (right_border_color['b'], right_border_color['g'], right_border_color['r'], 255)
@@ -345,7 +354,7 @@ def create_print_layout(template, output_base_path, metadata_path):
                         # Bottom-left quadrant: token below
                         below_index = temp_token_index + tokens_per_row
                         if below_index < total_tokens:
-                            below_filename = tokens_to_place[below_index]
+                            below_filename = tokens_to_place[below_index]['filename']
                             if below_filename in metadata_dict:
                                 below_border_color = metadata_dict[below_filename]['border_color']
                                 below_bg_color = (below_border_color['b'], below_border_color['g'], below_border_color['r'], 255)
@@ -357,7 +366,7 @@ def create_print_layout(template, output_base_path, metadata_path):
                         # Bottom-right quadrant: token diagonally down-right
                         diag_index = temp_token_index + tokens_per_row + 1
                         if diag_index < total_tokens:
-                            diag_filename = tokens_to_place[diag_index]
+                            diag_filename = tokens_to_place[diag_index]['filename']
                             if diag_filename in metadata_dict:
                                 diag_border_color = metadata_dict[diag_filename]['border_color']
                                 diag_bg_color = (diag_border_color['b'], diag_border_color['g'], diag_border_color['r'], 255)
@@ -379,7 +388,7 @@ def create_print_layout(template, output_base_path, metadata_path):
                         # Bottom half: token below color
                         below_index = temp_token_index + tokens_per_row
                         if below_index < total_tokens:
-                            below_filename = tokens_to_place[below_index]
+                            below_filename = tokens_to_place[below_index]['filename']
                             if below_filename in metadata_dict:
                                 below_border_color = metadata_dict[below_filename]['border_color']
                                 below_bg_color = (below_border_color['b'], below_border_color['g'], below_border_color['r'], 255)
@@ -398,7 +407,7 @@ def create_print_layout(template, output_base_path, metadata_path):
                         # Right half: token to the right color
                         right_index = temp_token_index + 1
                         if right_index < total_tokens:
-                            right_filename = tokens_to_place[right_index]
+                            right_filename = tokens_to_place[right_index]['filename']
                             if right_filename in metadata_dict:
                                 right_border_color = metadata_dict[right_filename]['border_color']
                                 right_bg_color = (right_border_color['b'], right_border_color['g'], right_border_color['r'], 255)
@@ -437,8 +446,15 @@ def create_print_layout(template, output_base_path, metadata_path):
                 if token_index >= total_tokens:
                     break
                 
-                filename = tokens_to_place[token_index]
-                token_path = img_folder / filename
+                token_info = tokens_to_place[token_index]
+                filename = token_info['filename']
+                subfolder = token_info['subfolder']
+                
+                # Build token path with subfolder if present
+                if subfolder:
+                    token_path = img_folder / subfolder / filename
+                else:
+                    token_path = img_folder / filename
                 
                 # Calculate position for this token
                 x_pos = x_margin_px + col * (token_size_px + x_spacer_px)
@@ -580,6 +596,11 @@ if __name__ == "__main__":
                 print(f"\n{'#'*50}")
                 print(f"# START: Processing template '{template_folder.name}'")
                 print(f"{'#'*50}")
+                
+                # Delete all existing PNG files in template folder before generating new ones
+                for png_file in template_folder.glob('*.png'):
+                    png_file.unlink()
+                    print(f"Deleted: {png_file.name}")
                 
                 # Update template with calculations
                 template = update_template_calculations(template_path)

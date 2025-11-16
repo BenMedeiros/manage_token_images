@@ -16,49 +16,91 @@
       "tokens_per_col": 3,
       "tokens_per_page": 15,
       "wasted_x": 0.0,
-      "wasted_y": 0.2
+      "wasted_y": 0.2,
+      "total_tokens": 30,
+      "wasted_tokens": 0
     }
   },
   "tokens_quantity_list": [
     {
       "filename": "dungeonrush_cover1.png",
-      "quantity": 15
+      "subfolder": "dungeonrush",
+      "quantity": 6
     },
     {
       "filename": "dungeonrush_cover2.png",
-      "quantity": 15
+      "subfolder": "dungeonrush",
+      "quantity": 6
     },
     {
       "filename": "empty.png",
-      "quantity": 16
+      "subfolder": "dungeonrush",
+      "quantity": 5
     },
     {
       "filename": "trap_bomb.png",
-      "quantity": 2
+      "subfolder": "dungeonrush",
+      "quantity": 1
     },
     {
       "filename": "trap_cage.png",
-      "quantity": 2
+      "subfolder": "dungeonrush",
+      "quantity": 1
     },
     {
       "filename": "trap_oilslick.png",
-      "quantity": 2
+      "subfolder": "dungeonrush",
+      "quantity": 1
     },
     {
       "filename": "trap_pushback.png",
-      "quantity": 2
+      "subfolder": "dungeonrush",
+      "quantity": 1
     },
     {
       "filename": "trap_spikes.png",
-      "quantity": 2
+      "subfolder": "dungeonrush",
+      "quantity": 1
     },
     {
       "filename": "treasure.png",
-      "quantity": 2
+      "subfolder": "dungeonrush",
+      "quantity": 1
     },
     {
       "filename": "wall.png",
-      "quantity": 2
+      "subfolder": "dungeonrush",
+      "quantity": 1
+    },
+    {
+      "filename": "quantum_gobblet_l.png",
+      "subfolder": "quantumgobblet",
+      "quantity": 1
+    },
+    {
+      "filename": "quantum_gobblet_m.png",
+      "subfolder": "quantumgobblet",
+      "quantity": 1
+    },
+    {
+      "filename": "quantum_gobblet_s.png",
+      "subfolder": "quantumgobblet",
+      "quantity": 1
+    },
+    {
+      "filename": "quantum_gobblet_xl.png",
+      "subfolder": "quantumgobblet",
+      "quantity": 1
+    },
+    {
+      "filename": "zombie_active.png",
+      "quantity": 1,
+      "subfolder": "zombie"
+    },
+    {
+      "filename": "zombie_dead.png",
+      "quantity": 1,
+      "subfolder": "zombie"
     }
   ]
 }
