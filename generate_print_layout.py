@@ -13,6 +13,114 @@ import re
 import itertools
 
 
+def draw_curved_text(img, text, center_x, center_y, radius, start_angle=90, 
+                      font_scale=0.3, text_color=(100, 100, 100, 255), upside_down=False):
+    """
+    Draw text curved along a circular arc path using OpenCV.
+    
+    Args:
+        img: Image array (BGRA format)
+        text: Text string to draw
+        center_x, center_y: Circle center coordinates
+        radius: Radius of the text path (distance from center to text baseline)
+        start_angle: Starting angle in degrees (90 = bottom, 0 = right, -90 = top)
+        font_scale: OpenCV font scale
+        text_color: BGRA color tuple
+        upside_down: If True, text reads correctly from outside the circle (flips character orientation)
+    """
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_thickness = max(1, int(font_scale * 2))  # Scale thickness with font size
+    
+    # Measure character widths to calculate angular spacing
+    char_widths = []
+    for char in text:
+        (char_w, char_h), _ = cv2.getTextSize(char, font, font_scale, font_thickness)
+        char_widths.append(char_w + 2)  # Add small spacing between characters
+    
+    # Calculate angular spacing per character based on arc length
+    # Arc length = radius * angle (in radians)
+    # For each character: angle = char_width / radius
+    char_angles = [w / radius * (180 / np.pi) for w in char_widths]  # Convert to degrees
+    
+    # Total angular span
+    total_angle = sum(char_angles)
+    
+    # Center the text around start_angle
+    current_angle = start_angle - total_angle / 2
+    
+    # Draw each character along the arc
+    for i, char in enumerate(text):
+        # Calculate position for this character on the arc
+        angle_rad = np.radians(current_angle)
+        x = int(center_x + radius * np.cos(angle_rad))
+        y = int(center_y + radius * np.sin(angle_rad))
+        
+        # Calculate rotation angle for the character (perpendicular to radius)
+        if upside_down:
+            # Text reads from outside: flip by 180 degrees
+            rotation_angle = current_angle + 90 + 180
+        else:
+            # Text reads from inside (default)
+            rotation_angle = current_angle + 90
+        
+        # Get character dimensions
+        (char_w, char_h), baseline = cv2.getTextSize(char, font, font_scale, font_thickness)
+        
+        # Create a temporary image for the rotated character (BGRA format)
+        temp_size = int(max(char_w, char_h) * 4)  # Larger to avoid clipping
+        char_img = np.zeros((temp_size, temp_size, 4), dtype=np.uint8)
+        
+        # Draw character centered in temp image with white color initially for visibility
+        char_x = (temp_size - char_w) // 2
+        char_y = (temp_size + char_h) // 2  # Baseline position
+        
+        # Draw text in BGR channels with full alpha
+        cv2.putText(char_img, char, (char_x, char_y), font, font_scale, 
+                   text_color, font_thickness, cv2.LINE_AA)
+        
+        # Rotate the character image
+        rotation_matrix = cv2.getRotationMatrix2D((temp_size // 2, temp_size // 2), 
+                                                   -rotation_angle, 1.0)
+        char_img_rotated = cv2.warpAffine(char_img, rotation_matrix, (temp_size, temp_size),
+                                          flags=cv2.INTER_LINEAR, 
+                                          borderMode=cv2.BORDER_CONSTANT,
+                                          borderValue=(0, 0, 0, 0))
+        
+        # Calculate paste position (center the rotated character at x, y)
+        paste_x = x - temp_size // 2
+        paste_y = y - temp_size // 2
+        
+        # Blend the rotated character onto the main image
+        # Handle boundaries
+        x1 = max(0, paste_x)
+        y1 = max(0, paste_y)
+        x2 = min(img.shape[1], paste_x + temp_size)
+        y2 = min(img.shape[0], paste_y + temp_size)
+        
+        if x2 > x1 and y2 > y1:
+            # Calculate source coordinates
+            src_x1 = x1 - paste_x
+            src_y1 = y1 - paste_y
+            src_x2 = src_x1 + (x2 - x1)
+            src_y2 = src_y1 + (y2 - y1)
+            
+            # Get the char region
+            char_region = char_img_rotated[src_y1:src_y2, src_x1:src_x2]
+            img_region = img[y1:y2, x1:x2]
+            
+            # Alpha blend using the alpha channel
+            alpha = char_region[:, :, 3:4].astype(np.float32) / 255.0
+            
+            # Blend RGB channels
+            img[y1:y2, x1:x2, :3] = (
+                alpha * char_region[:, :, :3].astype(np.float32) +
+                (1 - alpha) * img_region[:, :, :3].astype(np.float32)
+            ).astype(np.uint8)
+        
+        # Move to next character position
+        current_angle += char_angles[i]
+
+
 def expand_brightness_string(brightness_str):
     """
     Expand brightness string with array notation into multiple strings.
@@ -659,7 +767,7 @@ def create_print_layout(template, output_base_path, metadata_path):
                 else:
                     page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, :3] = token_resized
                 
-                # Draw brightness adjustment text below the token in the padding area
+                # Draw brightness adjustment text in the padding area
                 brightness_text = token_info.get('brightness_adjustment', '')
                 if token_padding_px > 5:  # Only if we have padding space
                     # Build info text with brightness and scale
@@ -671,29 +779,63 @@ def create_print_layout(template, output_base_path, metadata_path):
                     
                     info_text = " | ".join(info_parts)
                     
-                    # Calculate text position (bottom of padding area)
-                    text_x = slot_x + token_padding_px
-                    text_y = slot_y + token_size_px + token_padding_px + token_padding_px - 2  # Bottom of padding
+                    # Get metadata to determine shape type
+                    metadata_key = (subfolder, filename)
+                    shape_type = 'unknown'
+                    if metadata_key in metadata_dict:
+                        meta = metadata_dict[metadata_key]
+                        shape_info = meta.get('shape', {})
+                        shape_type = shape_info.get('type', 'unknown')
                     
-                    # Use smallest font size, scale based on PPI
-                    font = cv2.FONT_HERSHEY_SIMPLEX
-                    font_scale = max(0.2, token_padding_px / 80.0)  # Scale with padding
-                    font_thickness = 1
-                    text_color = (100, 100, 100, 255)  # Gray
-                    
-                    # Get text size to center it
-                    (text_width, text_height), baseline = cv2.getTextSize(
-                        info_text, font, font_scale, font_thickness
-                    )
-                    
-                    # Center text horizontally in the token area
-                    text_x_centered = slot_x + token_padding_px + (token_size_px - text_width) // 2
-                    
-                    # Ensure text fits in padding area
-                    if text_height + 2 <= token_padding_px:
-                        cv2.putText(page, info_text, 
-                                  (text_x_centered, text_y), 
-                                  font, font_scale, text_color, font_thickness, cv2.LINE_AA)
+                    # For circular tokens, draw curved text along inner perimeter
+                    if shape_type == 'circle':
+                        # Calculate center of token (including padding)
+                        center_x = slot_x + token_padding_px + token_size_px // 2
+                        center_y = slot_y + token_padding_px + token_size_px // 2
+                        
+                        # Text radius: on the padding circle, slightly inside the padding border
+                        # This puts text in the padding area between token and border
+                        text_radius = (token_size_px // 2) + token_padding_px - int(ppi * 0.04)  # 0.04 inch from padding border
+                        
+                        # Calculate font scale based on padding and PPI
+                        font_scale = max(0.35, token_padding_px / 80.0)  # Scale with padding, increased minimum
+                        
+                        text_color = (100, 100, 100, 255)  # Gray
+                        
+                        # Draw curved text along bottom arc of padding circle
+                        # Text reads correctly from outside (upside_down=True)
+                        # Reverse the string so it reads left-to-right when flipped
+                        draw_curved_text(page, info_text[::-1], center_x, center_y, text_radius, 
+                                       start_angle=90, font_scale=font_scale, text_color=text_color,
+                                       upside_down=True)
+                        
+                        # Debug: print that we drew curved text
+                        print(f"  Curved text for {filename}: radius={text_radius}px, scale={font_scale:.2f}")
+                    else:
+                        # For non-circular tokens, use straight text below the token
+                        # Calculate text position (bottom of padding area)
+                        text_x = slot_x + token_padding_px
+                        text_y = slot_y + token_size_px + token_padding_px + token_padding_px - 2  # Bottom of padding
+                        
+                        # Use smallest font size, scale based on PPI
+                        font = cv2.FONT_HERSHEY_SIMPLEX
+                        font_scale = max(0.2, token_padding_px / 80.0)  # Scale with padding
+                        font_thickness = 1
+                        text_color = (100, 100, 100, 255)  # Gray
+                        
+                        # Get text size to center it
+                        (text_width, text_height), baseline = cv2.getTextSize(
+                            info_text, font, font_scale, font_thickness
+                        )
+                        
+                        # Center text horizontally in the token area
+                        text_x_centered = slot_x + token_padding_px + (token_size_px - text_width) // 2
+                        
+                        # Ensure text fits in padding area
+                        if text_height + 2 <= token_padding_px:
+                            cv2.putText(page, info_text, 
+                                      (text_x_centered, text_y), 
+                                      font, font_scale, text_color, font_thickness, cv2.LINE_AA)
                 
                 token_index += 1
                 tokens_on_this_page += 1
