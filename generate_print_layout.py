@@ -731,6 +731,33 @@ def create_print_layout(template, output_base_path, metadata_path):
                 # Apply brightness adjustments
                 token_img = apply_brightness_adjustment(token_img, settings, token_info)
                 
+                # Get buffer settings (can be overridden per-token)
+                buffer_color = token_info.get('buffer_color', settings.get('buffer_color', 'black'))
+                buffer_size = token_info.get('buffer_size', settings.get('buffer_size', 0.10))  # Default 10%
+                
+                # Convert buffer_color string to BGR tuple
+                if isinstance(buffer_color, str):
+                    color_map = {
+                        'black': (0, 0, 0),
+                        'white': (255, 255, 255),
+                        'gray': (128, 128, 128),
+                        'grey': (128, 128, 128)
+                    }
+                    if buffer_color.startswith('#'):
+                        # Hex color
+                        hex_color = buffer_color.lstrip('#')
+                        r = int(hex_color[0:2], 16)
+                        g = int(hex_color[2:4], 16)
+                        b = int(hex_color[4:6], 16)
+                        buffer_color_bgr = (b, g, r)
+                    else:
+                        buffer_color_bgr = color_map.get(buffer_color.lower(), (0, 0, 0))
+                elif isinstance(buffer_color, (list, tuple)):
+                    # RGB tuple - convert to BGR
+                    buffer_color_bgr = (buffer_color[2], buffer_color[1], buffer_color[0])
+                else:
+                    buffer_color_bgr = (0, 0, 0)
+                
                 # Store original size for scale calculation
                 original_h, original_w = token_img.shape[:2]
                 
@@ -750,22 +777,76 @@ def create_print_layout(template, output_base_path, metadata_path):
                 # Resize token to target size
                 token_resized = cv2.resize(token_img, (token_size_px, token_size_px), interpolation=cv2.INTER_LANCZOS4)
                 
+                # Create buffer layer if buffer_size > 0
+                if buffer_size > 0:
+                    # Calculate buffer layer size (scaled up by buffer_size percentage)
+                    buffer_scale = 1.0 + buffer_size
+                    buffer_size_px = int(token_size_px * buffer_scale)
+                    
+                    # Create buffer layer with the specified color
+                    buffer_layer = np.zeros((buffer_size_px, buffer_size_px, 4), dtype=np.uint8)
+                    buffer_layer[:, :, :3] = buffer_color_bgr  # Set BGR color
+                    
+                    # Create a mask based on the token's alpha channel (scaled up)
+                    # Resize the alpha channel to buffer size
+                    token_alpha = token_resized[:, :, 3] if token_resized.shape[2] == 4 else np.ones((token_size_px, token_size_px), dtype=np.uint8) * 255
+                    buffer_alpha = cv2.resize(token_alpha, (buffer_size_px, buffer_size_px), interpolation=cv2.INTER_LINEAR)
+                    
+                    # Apply alpha to buffer layer
+                    buffer_layer[:, :, 3] = buffer_alpha
+                    
+                    # Calculate offset to center the token on the buffer
+                    buffer_offset = (buffer_size_px - token_size_px) // 2
+                    
+                    # Create composite image: buffer layer + token on top
+                    composite = buffer_layer.copy()
+                    
+                    # Paste token on top of buffer (with alpha blending)
+                    if token_resized.shape[2] == 4:
+                        token_alpha_norm = token_resized[:, :, 3:4] / 255.0
+                        for c in range(3):
+                            composite[buffer_offset:buffer_offset+token_size_px, 
+                                    buffer_offset:buffer_offset+token_size_px, c] = (
+                                token_alpha_norm[:, :, 0] * token_resized[:, :, c] +
+                                (1 - token_alpha_norm[:, :, 0]) * composite[buffer_offset:buffer_offset+token_size_px, 
+                                                                            buffer_offset:buffer_offset+token_size_px, c]
+                            ).astype(np.uint8)
+                        composite[buffer_offset:buffer_offset+token_size_px, 
+                                buffer_offset:buffer_offset+token_size_px, 3] = np.maximum(
+                            buffer_layer[buffer_offset:buffer_offset+token_size_px, 
+                                       buffer_offset:buffer_offset+token_size_px, 3],
+                            token_resized[:, :, 3]
+                        )
+                    else:
+                        composite[buffer_offset:buffer_offset+token_size_px, 
+                                buffer_offset:buffer_offset+token_size_px, :3] = token_resized
+                    
+                    # Use composite image and adjust placement
+                    final_token = composite
+                    final_size = buffer_size_px
+                    placement_offset = -buffer_offset
+                else:
+                    # No buffer, use token as-is
+                    final_token = token_resized
+                    final_size = token_size_px
+                    placement_offset = 0
+                
                 # Calculate scale ratio (from cropped to output)
                 scale_ratio = token_size_px / max(cropped_w, cropped_h)
                 # Compute placement
-                x_pos = slot_x + token_padding_px
-                y_pos = slot_y + token_padding_px
+                x_pos = slot_x + token_padding_px + placement_offset
+                y_pos = slot_y + token_padding_px + placement_offset
                 # Place with alpha blending
-                if token_resized.shape[2] == 4:
-                    alpha = token_resized[:, :, 3] / 255.0
+                if final_token.shape[2] == 4:
+                    alpha = final_token[:, :, 3] / 255.0
                     for c in range(3):
-                        page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, c] = (
-                            alpha * token_resized[:, :, c] +
-                            (1 - alpha) * page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, c]
+                        page[y_pos:y_pos+final_size, x_pos:x_pos+final_size, c] = (
+                            alpha * final_token[:, :, c] +
+                            (1 - alpha) * page[y_pos:y_pos+final_size, x_pos:x_pos+final_size, c]
                         )
-                    page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, 3] = 255
+                    page[y_pos:y_pos+final_size, x_pos:x_pos+final_size, 3] = 255
                 else:
-                    page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, :3] = token_resized
+                    page[y_pos:y_pos+final_size, x_pos:x_pos+final_size, :3] = final_token
                 
                 # Draw brightness adjustment text in the padding area
                 brightness_text = token_info.get('brightness_adjustment', '')
