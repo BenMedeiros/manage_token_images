@@ -6,11 +6,14 @@
     "xpos": 511.5,
     "ypos": 511.0,
     "diameter": 808.5,
-    "circularity": 0.899,
-    "aspect_ratio": 1.004,
-    "major_axis": 807.4,
-    "minor_axis": 804.3,
-    "ellipse_angle": 90.6,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.004,
+      "major_axis": 807.4,
+      "minor_axis": 804.3,
+      "ellipse_angle": 90.6,
+      "circularity": 0.899
+    },
     "border_color": {
       "r": 155,
       "g": 155,
@@ -33,11 +36,14 @@
     "xpos": 511.4,
     "ypos": 511.0,
     "diameter": 808.4,
-    "circularity": 0.899,
-    "aspect_ratio": 1.004,
-    "major_axis": 807.3,
-    "minor_axis": 804.4,
-    "ellipse_angle": 90.7,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.004,
+      "major_axis": 807.3,
+      "minor_axis": 804.4,
+      "ellipse_angle": 90.7,
+      "circularity": 0.899
+    },
     "border_color": {
       "r": 156,
       "g": 156,
@@ -60,11 +66,14 @@
     "xpos": 515.6,
     "ypos": 508.0,
     "diameter": 804.6,
-    "circularity": 0.898,
-    "aspect_ratio": 1.001,
-    "major_axis": 802.9,
-    "minor_axis": 802.0,
-    "ellipse_angle": 63.5,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.001,
+      "major_axis": 802.9,
+      "minor_axis": 802.0,
+      "ellipse_angle": 63.5,
+      "circularity": 0.898
+    },
     "border_color": {
       "r": 153,
       "g": 153,
@@ -87,11 +96,14 @@
     "xpos": 515.3,
     "ypos": 509.9,
     "diameter": 805.6,
-    "circularity": 0.898,
-    "aspect_ratio": 1.001,
-    "major_axis": 804.1,
-    "minor_axis": 803.3,
-    "ellipse_angle": 16.5,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.001,
+      "major_axis": 804.1,
+      "minor_axis": 803.3,
+      "ellipse_angle": 16.5,
+      "circularity": 0.898
+    },
     "border_color": {
       "r": 153,
       "g": 153,
@@ -114,11 +126,14 @@
     "xpos": 511.7,
     "ypos": 511.6,
     "diameter": 811.6,
-    "circularity": 0.899,
-    "aspect_ratio": 1.001,
-    "major_axis": 810.2,
-    "minor_axis": 809.3,
-    "ellipse_angle": 96.7,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.001,
+      "major_axis": 810.2,
+      "minor_axis": 809.3,
+      "ellipse_angle": 96.7,
+      "circularity": 0.899
+    },
     "border_color": {
       "r": 158,
       "g": 158,
@@ -141,11 +156,14 @@
     "xpos": 513.9,
     "ypos": 511.4,
     "diameter": 804.7,
-    "circularity": 0.899,
-    "aspect_ratio": 1.001,
-    "major_axis": 803.3,
-    "minor_axis": 802.3,
-    "ellipse_angle": 100.8,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.001,
+      "major_axis": 803.3,
+      "minor_axis": 802.3,
+      "ellipse_angle": 100.8,
+      "circularity": 0.899
+    },
     "border_color": {
       "r": 154,
       "g": 154,
@@ -168,11 +186,14 @@
     "xpos": 511.5,
     "ypos": 513.3,
     "diameter": 807.5,
-    "circularity": 0.898,
-    "aspect_ratio": 1.005,
-    "major_axis": 806.6,
-    "minor_axis": 802.6,
-    "ellipse_angle": 92.9,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.005,
+      "major_axis": 806.6,
+      "minor_axis": 802.6,
+      "ellipse_angle": 92.9,
+      "circularity": 0.898
+    },
     "border_color": {
       "r": 158,
       "g": 158,
@@ -195,11 +216,14 @@
     "xpos": 511.5,
     "ypos": 511.6,
     "diameter": 773.6,
-    "circularity": 0.9,
-    "aspect_ratio": 1.001,
-    "major_axis": 772.6,
-    "minor_axis": 772.0,
-    "ellipse_angle": 104.6,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.001,
+      "major_axis": 772.6,
+      "minor_axis": 772.0,
+      "ellipse_angle": 104.6,
+      "circularity": 0.9
+    },
     "border_color": {
       "r": 157,
       "g": 157,
@@ -222,11 +246,14 @@
     "xpos": 511.7,
     "ypos": 512.3,
     "diameter": 811.3,
-    "circularity": 0.899,
-    "aspect_ratio": 1.002,
-    "major_axis": 810.0,
-    "minor_axis": 808.7,
-    "ellipse_angle": 11.6,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.002,
+      "major_axis": 810.0,
+      "minor_axis": 808.7,
+      "ellipse_angle": 11.6,
+      "circularity": 0.899
+    },
     "border_color": {
       "r": 157,
       "g": 157,
@@ -249,11 +276,14 @@
     "xpos": 513.2,
     "ypos": 510.6,
     "diameter": 808.9,
-    "circularity": 0.899,
-    "aspect_ratio": 1.001,
-    "major_axis": 807.2,
-    "minor_axis": 806.2,
-    "ellipse_angle": 68.4,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.001,
+      "major_axis": 807.2,
+      "minor_axis": 806.2,
+      "ellipse_angle": 68.4,
+      "circularity": 0.899
+    },
     "border_color": {
       "r": 156,
       "g": 156,
@@ -270,17 +300,318 @@
     "subfolder": "dungeonrush"
   },
   {
+    "filename": "dungeonrush_cover1.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 512.0,
+    "ypos": 511.1,
+    "diameter": 954.7,
+    "shape": {
+      "type": "rounded_rect",
+      "aspect_ratio": 1.259,
+      "major_axis": 1043.5,
+      "minor_axis": 828.6,
+      "ellipse_angle": 88.1
+    },
+    "border_color": {
+      "r": 153,
+      "g": 150,
+      "b": 148,
+      "hex": "#999694"
+    },
+    "border_color_3px": {
+      "r": 106,
+      "g": 101,
+      "b": 97,
+      "hex": "#6a6561"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
+    "filename": "dungeonrush_cover2.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.5,
+    "ypos": 511.5,
+    "diameter": 1027.0,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.008,
+      "major_axis": 1017.1,
+      "minor_axis": 1008.5,
+      "ellipse_angle": 90.4,
+      "circularity": 0.853
+    },
+    "border_color": {
+      "r": 148,
+      "g": 148,
+      "b": 148,
+      "hex": "#949494"
+    },
+    "border_color_3px": {
+      "r": 70,
+      "g": 70,
+      "b": 70,
+      "hex": "#464646"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
+    "filename": "empty.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.5,
+    "ypos": 511.9,
+    "diameter": 798.5,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.006,
+      "major_axis": 789.9,
+      "minor_axis": 784.9,
+      "ellipse_angle": 90.0,
+      "circularity": 0.85
+    },
+    "border_color": {
+      "r": 149,
+      "g": 149,
+      "b": 149,
+      "hex": "#959595"
+    },
+    "border_color_3px": {
+      "r": 80,
+      "g": 80,
+      "b": 79,
+      "hex": "#50504f"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
+    "filename": "trap_bomb.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.5,
+    "ypos": 511.5,
+    "diameter": 1080.6,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.008,
+      "major_axis": 1063.6,
+      "minor_axis": 1055.6,
+      "ellipse_angle": 176.1,
+      "circularity": 0.871
+    },
+    "border_color": {
+      "r": 151,
+      "g": 151,
+      "b": 151,
+      "hex": "#979797"
+    },
+    "border_color_3px": {
+      "r": 83,
+      "g": 83,
+      "b": 83,
+      "hex": "#535353"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
+    "filename": "trap_cage.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.5,
+    "ypos": 511.5,
+    "diameter": 930.8,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.001,
+      "major_axis": 915.9,
+      "minor_axis": 915.2,
+      "ellipse_angle": 84.5,
+      "circularity": 0.865
+    },
+    "border_color": {
+      "r": 162,
+      "g": 162,
+      "b": 162,
+      "hex": "#a2a2a2"
+    },
+    "border_color_3px": {
+      "r": 92,
+      "g": 92,
+      "b": 92,
+      "hex": "#5c5c5c"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
+    "filename": "trap_oilslick.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 512.4,
+    "ypos": 511.5,
+    "diameter": 1151.3,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.001,
+      "major_axis": 1137.4,
+      "minor_axis": 1136.1,
+      "ellipse_angle": 87.5,
+      "circularity": 0.846
+    },
+    "border_color": {
+      "r": 139,
+      "g": 140,
+      "b": 141,
+      "hex": "#8b8c8d"
+    },
+    "border_color_3px": {
+      "r": 80,
+      "g": 81,
+      "b": 80,
+      "hex": "#505150"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
+    "filename": "trap_pushback.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.1,
+    "ypos": 511.5,
+    "diameter": 1021.9,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.009,
+      "major_axis": 1012.0,
+      "minor_axis": 1003.1,
+      "ellipse_angle": 87.3,
+      "circularity": 0.854
+    },
+    "border_color": {
+      "r": 136,
+      "g": 138,
+      "b": 139,
+      "hex": "#888a8b"
+    },
+    "border_color_3px": {
+      "r": 77,
+      "g": 78,
+      "b": 78,
+      "hex": "#4d4e4e"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
+    "filename": "trap_spikes.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.1,
+    "ypos": 511.1,
+    "diameter": 960.3,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.0,
+      "major_axis": 949.3,
+      "minor_axis": 948.9,
+      "ellipse_angle": 11.6,
+      "circularity": 0.842
+    },
+    "border_color": {
+      "r": 134,
+      "g": 136,
+      "b": 137,
+      "hex": "#868889"
+    },
+    "border_color_3px": {
+      "r": 75,
+      "g": 76,
+      "b": 75,
+      "hex": "#4b4c4b"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
+    "filename": "treasure.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 512.0,
+    "ypos": 513.6,
+    "diameter": 968.4,
+    "shape": {
+      "type": "rounded_rect",
+      "aspect_ratio": 1.031,
+      "major_axis": 964.7,
+      "minor_axis": 935.7,
+      "ellipse_angle": 179.9
+    },
+    "border_color": {
+      "r": 138,
+      "g": 139,
+      "b": 140,
+      "hex": "#8a8b8c"
+    },
+    "border_color_3px": {
+      "r": 79,
+      "g": 80,
+      "b": 80,
+      "hex": "#4f5050"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
+    "filename": "wall.png",
+    "xsize": 1024,
+    "ysize": 1024,
+    "xpos": 511.5,
+    "ypos": 511.0,
+    "diameter": 1005.0,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.003,
+      "major_axis": 990.0,
+      "minor_axis": 986.7,
+      "ellipse_angle": 179.3,
+      "circularity": 0.869
+    },
+    "border_color": {
+      "r": 137,
+      "g": 138,
+      "b": 140,
+      "hex": "#898a8c"
+    },
+    "border_color_3px": {
+      "r": 79,
+      "g": 79,
+      "b": 80,
+      "hex": "#4f4f50"
+    },
+    "border_thickness": 1,
+    "subfolder": "dungeonrush_square"
+  },
+  {
     "filename": "quantum_gobblet_l.png",
     "xsize": 412,
     "ysize": 419,
     "xpos": 208.4,
     "ypos": 206.6,
     "diameter": 372.0,
-    "circularity": 0.898,
-    "aspect_ratio": 1.001,
-    "major_axis": 370.8,
-    "minor_axis": 370.2,
-    "ellipse_angle": 31.7,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.001,
+      "major_axis": 370.8,
+      "minor_axis": 370.2,
+      "ellipse_angle": 31.7,
+      "circularity": 0.898
+    },
     "border_color": {
       "r": 115,
       "g": 45,
@@ -303,11 +634,14 @@
     "xpos": 192.5,
     "ypos": 199.5,
     "diameter": 397.0,
-    "circularity": 0.829,
-    "aspect_ratio": 1.012,
-    "major_axis": 371.5,
-    "minor_axis": 367.1,
-    "ellipse_angle": 84.6,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.012,
+      "major_axis": 371.5,
+      "minor_axis": 367.1,
+      "ellipse_angle": 84.6,
+      "circularity": 0.829
+    },
     "border_color": {
       "r": 31,
       "g": 126,
@@ -330,11 +664,14 @@
     "xpos": 219.4,
     "ypos": 201.1,
     "diameter": 375.5,
-    "circularity": 0.892,
-    "aspect_ratio": 1.003,
-    "major_axis": 369.4,
-    "minor_axis": 368.4,
-    "ellipse_angle": 96.9,
+    "shape": {
+      "type": "circle",
+      "aspect_ratio": 1.003,
+      "major_axis": 369.4,
+      "minor_axis": 368.4,
+      "ellipse_angle": 96.9,
+      "circularity": 0.892
+    },
     "border_color": {
       "r": 22,
       "g": 106,
@@ -357,11 +694,14 @@
     "xpos": 200.0,
     "ypos": 202.5,
     "diameter": 392.3,
-    "circularity": 0.839,
-    "aspect_ratio": 1.003,
-    "major_axis": 370.4,
-    "minor_axis": 369.2,
-    "ellipse_angle": 103.9,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.003,
+      "major_axis": 370.4,
+      "minor_axis": 369.2,
+      "ellipse_angle": 103.9,
+      "circularity": 0.839
+    },
     "border_color": {
       "r": 122,
       "g": 103,
@@ -384,11 +724,14 @@
     "xpos": 511.2,
     "ypos": 510.7,
     "diameter": 1030.9,
-    "circularity": 0.838,
-    "aspect_ratio": 1.0,
-    "major_axis": 1021.9,
-    "minor_axis": 1021.5,
-    "ellipse_angle": 133.2,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.0,
+      "major_axis": 1021.9,
+      "minor_axis": 1021.5,
+      "ellipse_angle": 133.2,
+      "circularity": 0.838
+    },
     "border_color": {
       "r": 56,
       "g": 45,
@@ -411,11 +754,14 @@
     "xpos": 511.5,
     "ypos": 510.8,
     "diameter": 1030.9,
-    "circularity": 0.837,
-    "aspect_ratio": 1.001,
-    "major_axis": 1022.1,
-    "minor_axis": 1021.0,
-    "ellipse_angle": 103.8,
+    "shape": {
+      "type": "rounded_square",
+      "aspect_ratio": 1.001,
+      "major_axis": 1022.1,
+      "minor_axis": 1021.0,
+      "ellipse_angle": 103.8,
+      "circularity": 0.837
+    },
     "border_color": {
       "r": 55,
       "g": 45,

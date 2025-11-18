@@ -221,8 +221,37 @@ def remove_background(image_path, output_path):
     cv2.imwrite(str(output_path), img_rgba)
     print(f"Processed: {image_path.name} -> {output_path.name}")
     
-    # Create metadata
+    # Create metadata with shape classification
     ellipse = circle_info.get('ellipse') if circle_info else None
+    circularity = round(circle_info['circularity'], 3) if circle_info else 0
+    aspect_ratio = round(ellipse['aspect_ratio'], 3) if ellipse else 1.0
+    
+    # Classify shape
+    shape_type = 'unknown'
+    if circularity >= 0.89 and 0.97 <= aspect_ratio <= 1.03:
+        shape_type = 'circle'
+    elif circularity >= 0.80 and 0.97 <= aspect_ratio <= 1.03:
+        shape_type = 'rounded_square'
+    elif circularity < 0.80 and 0.97 <= aspect_ratio <= 1.03:
+        shape_type = 'square'
+    elif circularity >= 0.80 and aspect_ratio > 1.03:
+        shape_type = 'rounded_rect'
+    else:
+        shape_type = 'rect'
+    
+    # Build shape info
+    shape_info = {
+        'type': shape_type,
+        'aspect_ratio': aspect_ratio,
+        'major_axis': round(ellipse['major_axis'], 1) if ellipse else 0,
+        'minor_axis': round(ellipse['minor_axis'], 1) if ellipse else 0,
+        'ellipse_angle': round(ellipse['angle'], 1) if ellipse else 0
+    }
+    
+    # Add circularity for circular shapes
+    if shape_type in ['circle', 'rounded_square']:
+        shape_info['circularity'] = circularity
+    
     metadata = {
         'filename': image_path.name,
         'xsize': width,
@@ -230,11 +259,7 @@ def remove_background(image_path, output_path):
         'xpos': round(circle_info['x'], 1) if circle_info else 0,
         'ypos': round(circle_info['y'], 1) if circle_info else 0,
         'diameter': round(circle_info['radius'] * 2, 1) if circle_info else 0,
-        'circularity': round(circle_info['circularity'], 3) if circle_info else 0,
-        'aspect_ratio': round(ellipse['aspect_ratio'], 3) if ellipse else 1.0,
-        'major_axis': round(ellipse['major_axis'], 1) if ellipse else 0,
-        'minor_axis': round(ellipse['minor_axis'], 1) if ellipse else 0,
-        'ellipse_angle': round(ellipse['angle'], 1) if ellipse else 0,
+        'shape': shape_info,
         'border_color': avg_color_rgb,
         'border_color_3px': border_color_3px,
         'border_thickness': border_thickness
@@ -314,8 +339,7 @@ def process_all_images(input_folder="img/input", output_subfolder="img/output"):
                 "print_height": 11.0,
                 "x_margin": 0.3,
                 "y_margin": 0.3,
-                "x_spacer": 0.15,
-                "y_spacer": 0.15,
+                "padding": 0.15,
                 "token_size": 1.0,
                 "ppi": [300, 600]
             },

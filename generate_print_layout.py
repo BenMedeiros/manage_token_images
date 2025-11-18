@@ -9,6 +9,163 @@ import json
 import cv2
 import numpy as np
 from pathlib import Path
+import re
+import itertools
+
+
+def expand_brightness_string(brightness_str):
+    """
+    Expand brightness string with array notation into multiple strings.
+    
+    Examples:
+        "[1,1.5,2]-0-1-1" -> ["1-0-1-1", "1.5-0-1-1", "2-0-1-1"]
+        "1.5-0-[1,1.5]-1" -> ["1.5-0-1-1", "1.5-0-1.5-1"]
+        "[1,2]-0-1-[1,2]" -> ["1-0-1-1", "1-0-1-2", "2-0-1-1", "2-0-1-2"]
+    
+    Args:
+        brightness_str: String with optional array notation
+        
+    Returns:
+        List of expanded brightness strings
+    """
+    if '[' not in brightness_str:
+        return [brightness_str]
+    
+    # Find all array patterns [x,y,z]
+    array_pattern = r'\[([^\]]+)\]'
+    matches = list(re.finditer(array_pattern, brightness_str))
+    
+    if not matches:
+        return [brightness_str]
+    
+    # Extract arrays
+    arrays = []
+    for match in matches:
+        values_str = match.group(1)
+        values = [v.strip() for v in values_str.split(',')]
+        arrays.append(values)
+    
+    # Generate all combinations using cartesian product
+    combinations = list(itertools.product(*arrays))
+    
+    # Replace arrays with values for each combination
+    result = []
+    for combo in combinations:
+        output = brightness_str
+        for i, match in enumerate(reversed(matches)):  # Reverse to maintain indices
+            output = output[:match.start()] + combo[len(combo)-1-i] + output[match.end():]
+        result.append(output)
+    
+    return result
+
+
+def apply_brightness_adjustment(img, settings, token_info):
+    """
+    Apply brightness adjustments to an image for photo paper printing.
+    
+    Adjustments preserve blacks while brightening midtones and highlights.
+    Can be set at template level (settings) and overridden per-token (token_info).
+    
+    Args:
+        img: Image array (BGR or BGRA)
+        settings: Template settings dict
+        token_info: Individual token dict
+        
+    Returns:
+        Adjusted image array
+    """
+    # Get brightness adjustment settings (token overrides template)
+    brightness = token_info.get('brightness_adjustment') or settings.get('brightness_adjustment')
+    
+    if not brightness:
+        return img
+    
+    # Expand array notation if present and take first result (for template-level settings)
+    if isinstance(brightness, str) and '[' in brightness:
+        expanded = expand_brightness_string(brightness)
+        if expanded:
+            brightness = expanded[0]  # Use first expanded value
+        else:
+            return img
+    
+    # Parse brightness adjustment (string format "g-sl-mb-hb" or dict)
+    if isinstance(brightness, str):
+        parts = brightness.split('-')
+        if len(parts) != 4:
+            print(f"Warning: Invalid brightness string '{brightness}', expected format 'g-sl-mb-hb'")
+            return img
+        try:
+            gamma = float(parts[0])
+            shadow_lift = float(parts[1])
+            midtone_boost = float(parts[2])
+            highlight_boost = float(parts[3])
+        except ValueError:
+            print(f"Warning: Invalid brightness values in '{brightness}'")
+            return img
+    elif isinstance(brightness, dict):
+        # Extract adjustment parameters with defaults
+        gamma = brightness.get('gamma', 1.0)
+        shadow_lift = brightness.get('shadow_lift', 0.0)
+        midtone_boost = brightness.get('midtone_boost', 1.0)
+        highlight_boost = brightness.get('highlight_boost', 1.0)
+    else:
+        return img
+    
+    # Separate alpha channel if present
+    has_alpha = img.shape[2] == 4
+    if has_alpha:
+        alpha = img[:, :, 3].copy()
+        img_rgb = img[:, :, :3].copy()
+    else:
+        img_rgb = img.copy()
+    
+    # Convert to float [0, 1]
+    img_float = img_rgb.astype(np.float32) / 255.0
+    
+    # Apply gamma correction (affects midtones most)
+    if gamma != 1.0:
+        img_float = np.power(img_float, 1.0 / gamma)
+    
+    # Apply shadow/midtone/highlight adjustments
+    # Shadows: 0-0.33, Midtones: 0.33-0.67, Highlights: 0.67-1.0
+    if shadow_lift != 0.0 or midtone_boost != 1.0 or highlight_boost != 1.0:
+        # Create masks for each tonal range
+        luminance = 0.299 * img_float[:, :, 2] + 0.587 * img_float[:, :, 1] + 0.114 * img_float[:, :, 0]
+        
+        # Shadow mask (peaks at 0, fades by 0.33)
+        shadow_mask = np.clip(1.0 - luminance / 0.33, 0, 1)
+        
+        # Midtone mask (peaks at 0.5, fades at 0.33 and 0.67)
+        midtone_mask = np.zeros_like(luminance)
+        low_mid = luminance < 0.5
+        midtone_mask[low_mid] = (luminance[low_mid] - 0.33) / 0.17
+        midtone_mask[~low_mid] = (0.67 - luminance[~low_mid]) / 0.17
+        midtone_mask = np.clip(midtone_mask, 0, 1)
+        
+        # Highlight mask (peaks at 1.0, fades by 0.67)
+        highlight_mask = np.clip((luminance - 0.67) / 0.33, 0, 1)
+        
+        # Apply adjustments per channel
+        for c in range(3):
+            if shadow_lift != 0.0:
+                img_float[:, :, c] += shadow_mask * shadow_lift
+            if midtone_boost != 1.0:
+                img_float[:, :, c] = img_float[:, :, c] * (1 + midtone_mask * (midtone_boost - 1.0))
+            if highlight_boost != 1.0:
+                img_float[:, :, c] = img_float[:, :, c] * (1 + highlight_mask * (highlight_boost - 1.0))
+    
+    # Clip and convert back to uint8
+    img_float = np.clip(img_float, 0, 1)
+    img_adjusted = (img_float * 255).astype(np.uint8)
+    
+    # Restore alpha channel if present
+    if has_alpha:
+        img_result = np.zeros((img.shape[0], img.shape[1], 4), dtype=np.uint8)
+        img_result[:, :, :3] = img_adjusted
+        img_result[:, :, 3] = alpha
+        return img_result
+    
+    return img_adjusted
 
 
 def calculate_tokens_per_page(settings):
@@ -25,18 +182,17 @@ def calculate_tokens_per_page(settings):
     print_height = settings['print_height']
     x_margin = settings['x_margin']
     y_margin = settings['y_margin']
-    x_spacer = settings['x_spacer']
-    y_spacer = settings['y_spacer']
+    padding = settings.get('padding', 0.0)
     token_size = settings['token_size']
-    
+
     # Calculate tokens per row
     available_width = print_width - 2 * x_margin
-    tokens_per_row = int((available_width + x_spacer) / (token_size + x_spacer))
-    
+    tokens_per_row = int(available_width / (token_size + 2 * padding))
+
     # Calculate tokens per column
     available_height = print_height - 2 * y_margin
-    tokens_per_col = int((available_height + y_spacer) / (token_size + y_spacer))
-    
+    tokens_per_col = int(available_height / (token_size + 2 * padding))
+
     return tokens_per_row, tokens_per_col
 
 
@@ -59,17 +215,33 @@ def update_template_calculations(template_path):
     token_size = settings['token_size']
     x_margin = settings['x_margin']
     y_margin = settings['y_margin']
-    x_spacer = settings['x_spacer']
-    y_spacer = settings['y_spacer']
-    
-    used_width = 2 * x_margin + tokens_per_row * token_size + (tokens_per_row - 1) * x_spacer
+    padding = settings.get('padding', 0.0)
+
+    used_width = 2 * x_margin + tokens_per_row * (token_size + 2 * padding)
     wasted_x = settings['print_width'] - used_width
-    
-    used_height = 2 * y_margin + tokens_per_col * token_size + (tokens_per_col - 1) * y_spacer
+
+    used_height = 2 * y_margin + tokens_per_col * (token_size + 2 * padding)
     wasted_y = settings['print_height'] - used_height
     
-    # Calculate token counts
-    total_tokens = sum(item['quantity'] for item in template['tokens_quantity_list'])
+    # Calculate token counts (handle brightness_adjustment arrays and expansion)
+    total_tokens = 0
+    for item in template['tokens_quantity_list']:
+        brightness_adj = item.get('brightness_adjustment')
+        if isinstance(brightness_adj, list):
+            # Count expanded tokens from array
+            for brightness_config in brightness_adj:
+                if isinstance(brightness_config, str):
+                    expanded = expand_brightness_string(brightness_config)
+                    total_tokens += len(expanded)
+                else:
+                    total_tokens += 1
+        else:
+            if brightness_adj and isinstance(brightness_adj, str):
+                expanded = expand_brightness_string(brightness_adj)
+                total_tokens += len(expanded)
+            else:
+                total_tokens += item['quantity']
+    
     tokens_per_page = tokens_per_row * tokens_per_col
     pages_needed = (total_tokens + tokens_per_page - 1) // tokens_per_page
     
@@ -123,16 +295,15 @@ def create_print_layout(template, output_base_path, metadata_path):
     with open(metadata_path, 'r') as f:
         metadata_list = json.load(f)
     
-    # Create lookup dict for metadata by filename
-    metadata_dict = {meta['filename']: meta for meta in metadata_list}
+    # Create lookup dict for metadata by (subfolder, filename) to handle duplicates
+    metadata_dict = {(meta.get('subfolder'), meta['filename']): meta for meta in metadata_list}
     
     # Get settings
     print_width = settings['print_width']
     print_height = settings['print_height']
     x_margin = settings['x_margin']
     y_margin = settings['y_margin']
-    x_spacer = settings['x_spacer']
-    y_spacer = settings['y_spacer']
+    padding = settings.get('padding', 0.0)
     token_size = settings['token_size']
     ppi = settings['ppi']
     
@@ -142,8 +313,7 @@ def create_print_layout(template, output_base_path, metadata_path):
     token_size_px = int(token_size * ppi)
     x_margin_px = int(x_margin * ppi)
     y_margin_px = int(y_margin * ppi)
-    x_spacer_px = int(x_spacer * ppi)
-    y_spacer_px = int(y_spacer * ppi)
+    padding_px = int(padding * ppi)
     
     # Get calculated values
     if 'calculated' in settings:
@@ -152,9 +322,9 @@ def create_print_layout(template, output_base_path, metadata_path):
     else:
         # Calculate if not present
         available_width = print_width - 2 * x_margin
-        tokens_per_row = int((available_width + x_spacer) / (token_size + x_spacer))
+        tokens_per_row = int(available_width / (token_size + 2 * padding))
         available_height = print_height - 2 * y_margin
-        tokens_per_col = int((available_height + y_spacer) / (token_size + y_spacer))
+        tokens_per_col = int(available_height / (token_size + 2 * padding))
     
     tokens_per_page = tokens_per_row * tokens_per_col
     
@@ -168,8 +338,70 @@ def create_print_layout(template, output_base_path, metadata_path):
         filename = item['filename']
         subfolder = item.get('subfolder')  # Optional subfolder field
         quantity = item['quantity']
-        for _ in range(quantity):
-            tokens_to_place.append({'filename': filename, 'subfolder': subfolder})
+        
+        # Handle brightness_adjustment as array or single value
+        brightness_adj = item.get('brightness_adjustment')
+        if isinstance(brightness_adj, list):
+            # Array of brightness configs - create one token per config
+            for brightness_config in brightness_adj:
+                # Expand array notation in brightness string
+                if isinstance(brightness_config, str):
+                    expanded = expand_brightness_string(brightness_config)
+                    for expanded_str in expanded:
+                        tokens_to_place.append({
+                            'filename': filename,
+                            'subfolder': subfolder,
+                            'brightness_adjustment': expanded_str
+                        })
+                else:
+                    tokens_to_place.append({
+                        'filename': filename,
+                        'subfolder': subfolder,
+                        'brightness_adjustment': brightness_config
+                    })
+        else:
+            # Single brightness config or none - check template default
+            # Get template-level brightness setting
+            template_brightness = settings.get('brightness_adjustment')
+            
+            # Determine effective brightness setting
+            effective_brightness = brightness_adj or template_brightness
+            
+            if effective_brightness:
+                # Expand array notation if present
+                if isinstance(effective_brightness, str):
+                    expanded = expand_brightness_string(effective_brightness)
+                    if len(expanded) > 1:
+                        # Multiple expanded values - create one token per expansion
+                        for expanded_str in expanded:
+                            tokens_to_place.append({
+                                'filename': filename,
+                                'subfolder': subfolder,
+                                'brightness_adjustment': expanded_str
+                            })
+                    else:
+                        # Single value after expansion
+                        for _ in range(quantity):
+                            tokens_to_place.append({
+                                'filename': filename,
+                                'subfolder': subfolder,
+                                'brightness_adjustment': expanded[0]
+                            })
+                else:
+                    # Dict format or other
+                    for _ in range(quantity):
+                        tokens_to_place.append({
+                            'filename': filename,
+                            'subfolder': subfolder,
+                            'brightness_adjustment': effective_brightness
+                        })
+            else:
+                # No brightness adjustment
+                for _ in range(quantity):
+                    tokens_to_place.append({
+                        'filename': filename,
+                        'subfolder': subfolder
+                    })
     
     total_tokens = len(tokens_to_place)
     pages_needed = (total_tokens + tokens_per_page - 1) // tokens_per_page
@@ -189,323 +421,211 @@ def create_print_layout(template, output_base_path, metadata_path):
     for page_num in range(pages_needed):
         # Create blank white page (BGRA format)
         page = np.ones((page_height_px, page_width_px, 4), dtype=np.uint8) * 255
-        
-        # Draw grid lines BEFORE placing tokens
-        gray_bgr = (128, 128, 128, 255)  # Gray color for fine lines with full opacity
-        black_bgr = (0, 0, 0, 255)  # Black color for grid outline with full opacity
+        gray_bgr = (128, 128, 128, 255)
         line_thickness = 1
-        
-        # Draw margin lines (page boundaries)
-        cv2.rectangle(page, 
-                     (x_margin_px, y_margin_px),
-                     (page_width_px - x_margin_px, page_height_px - y_margin_px),
-                     gray_bgr, line_thickness)
-        
-        # Draw vertical grid lines
-        for col in range(tokens_per_row + 1):
-            # Left edge of each token column
-            x_left = x_margin_px + col * (token_size_px + x_spacer_px)
-            cv2.line(page, (x_left, y_margin_px), (x_left, page_height_px - y_margin_px), gray_bgr, line_thickness)
-            
-            # Right edge (creates spacer line) - only draw if not the last column
-            if col < tokens_per_row:
-                x_right = x_left + token_size_px
-                cv2.line(page, (x_right, y_margin_px), (x_right, page_height_px - y_margin_px), gray_bgr, line_thickness)
-                
-                # Center line of each token (midpoint)
-                x_center = x_left + token_size_px // 2
-                cv2.line(page, (x_center, y_margin_px), (x_center, page_height_px - y_margin_px), gray_bgr, line_thickness)
-        
-        # Draw horizontal grid lines
-        for row in range(tokens_per_col + 1):
-            # Top edge of each token row
-            y_top = y_margin_px + row * (token_size_px + y_spacer_px)
-            cv2.line(page, (x_margin_px, y_top), (page_width_px - x_margin_px, y_top), gray_bgr, line_thickness)
-            
-            # Bottom edge (creates spacer line) - only draw if not the last row
-            if row < tokens_per_col:
-                y_bottom = y_top + token_size_px
-                cv2.line(page, (x_margin_px, y_bottom), (page_width_px - x_margin_px, y_bottom), gray_bgr, line_thickness)
-                
-                # Center line of each token (midpoint)
-                y_center = y_top + token_size_px // 2
-                cv2.line(page, (x_margin_px, y_center), (page_width_px - x_margin_px, y_center), gray_bgr, line_thickness)
+        # Draw all 4 margin lines (page boundaries)
+        # Top
+        cv2.line(page, (0, y_margin_px), (page_width_px, y_margin_px), gray_bgr, line_thickness)
+        # Bottom
+        cv2.line(page, (0, page_height_px - y_margin_px), (page_width_px, page_height_px - y_margin_px), gray_bgr, line_thickness)
+        # Left
+        cv2.line(page, (x_margin_px, 0), (x_margin_px, page_height_px), gray_bgr, line_thickness)
+        # Right
+        cv2.line(page, (page_width_px - x_margin_px, 0), (page_width_px - x_margin_px, page_height_px), gray_bgr, line_thickness)
         
         tokens_on_this_page = 0
         
-        # First pass: Fill backgrounds including spacers
+        # Draw token padding borders
         temp_token_index = token_index
         for row in range(tokens_per_col):
             for col in range(tokens_per_row):
                 if temp_token_index >= total_tokens:
                     break
-                
                 token_info = tokens_to_place[temp_token_index]
                 filename = token_info['filename']
                 subfolder = token_info['subfolder']
-                
-                # Calculate position for this token
-                x_pos = x_margin_px + col * (token_size_px + x_spacer_px)
-                y_pos = y_margin_px + row * (token_size_px + y_spacer_px)
-                
-                # Get background color from metadata
-                if filename in metadata_dict:
-                    border_color = metadata_dict[filename]['border_color']
-                    # OpenCV uses BGR format
-                    bg_color = (border_color['b'], border_color['g'], border_color['r'], 255)
+                # Per-token padding override
+                token_padding = padding
+                if 'padding' in token_info:
+                    token_padding = token_info['padding']
+                token_padding_px = int(token_padding * ppi)
+                # Calculate center position for this token's slot
+                slot_x = x_margin_px + col * (token_size_px + 2 * padding_px)
+                slot_y = y_margin_px + row * (token_size_px + 2 * padding_px)
+                center_x = slot_x + token_size_px // 2 + token_padding_px
+                center_y = slot_y + token_size_px // 2 + token_padding_px
+                # Draw border: circle or rounded square based on token shape
+                metadata_key = (subfolder, filename)
+                if metadata_key in metadata_dict:
+                    meta = metadata_dict[metadata_key]
+                    shape_info = meta.get('shape', {})
+                    shape_type = shape_info.get('type', 'unknown')
                     
-                    # Fill the token area
-                    page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px] = bg_color
-                    
-                    # Fill left margin extension (for first column)
-                    if col == 0:
-                        margin_bleed = min(x_margin_px, x_spacer_px)
-                        page[y_pos:y_pos+token_size_px, x_pos-margin_bleed:x_pos] = bg_color
-                    
-                    # Fill right margin extension (for last column)
-                    if col == tokens_per_row - 1:
-                        margin_bleed = min(x_margin_px, x_spacer_px)
-                        page[y_pos:y_pos+token_size_px, x_pos+token_size_px:x_pos+token_size_px+margin_bleed] = bg_color
-                    
-                    # Fill top margin extension (for first row)
-                    if row == 0:
-                        margin_bleed = min(y_margin_px, y_spacer_px)
-                        page[y_pos-margin_bleed:y_pos, x_pos:x_pos+token_size_px] = bg_color
-                    
-                    # Fill bottom margin extension (for last row)
-                    if row == tokens_per_col - 1:
-                        margin_bleed = min(y_margin_px, y_spacer_px)
-                        page[y_pos+token_size_px:y_pos+token_size_px+margin_bleed, x_pos:x_pos+token_size_px] = bg_color
-                    
-                    # Fill right spacer (split with next token to the right, or extend current color if last column)
-                    if x_spacer_px > 0:
-                        if col < tokens_per_row - 1:
-                            # Not last column - check for next token
-                            next_index = temp_token_index + 1
-                            if next_index < total_tokens:
-                                next_filename = tokens_to_place[next_index]['filename']
-                                if next_filename in metadata_dict:
-                                    next_border_color = metadata_dict[next_filename]['border_color']
-                                    next_bg_color = (next_border_color['b'], next_border_color['g'], next_border_color['r'], 255)
-                                    
-                                    # Split spacer in half
-                                    spacer_start_x = x_pos + token_size_px
-                                    spacer_mid_x = spacer_start_x + x_spacer_px // 2
-                                    spacer_end_x = spacer_start_x + x_spacer_px
-                                    
-                                    # Left half: current token color
-                                    page[y_pos:y_pos+token_size_px, spacer_start_x:spacer_mid_x] = bg_color
-                                    # Right half: next token color
-                                    page[y_pos:y_pos+token_size_px, spacer_mid_x:spacer_end_x] = next_bg_color
-                            else:
-                                # No next token - fill entire spacer with current color
-                                spacer_start_x = x_pos + token_size_px
-                                spacer_end_x = spacer_start_x + x_spacer_px
-                                page[y_pos:y_pos+token_size_px, spacer_start_x:spacer_end_x] = bg_color
-                    
-                    # Fill bottom spacer (split with token below, or extend current color if last row)
-                    if y_spacer_px > 0:
-                        if row < tokens_per_col - 1:
-                            # Not last row - check for token below
-                            next_index = temp_token_index + tokens_per_row
-                            if next_index < total_tokens:
-                                next_filename = tokens_to_place[next_index]['filename']
-                                if next_filename in metadata_dict:
-                                    next_border_color = metadata_dict[next_filename]['border_color']
-                                    next_bg_color = (next_border_color['b'], next_border_color['g'], next_border_color['r'], 255)
-                                    
-                                    # Split spacer in half
-                                    spacer_start_y = y_pos + token_size_px
-                                    spacer_mid_y = spacer_start_y + y_spacer_px // 2
-                                    spacer_end_y = spacer_start_y + y_spacer_px
-                                    
-                                    # Top half: current token color
-                                    page[spacer_start_y:spacer_mid_y, x_pos:x_pos+token_size_px] = bg_color
-                                    # Bottom half: next token color
-                                    page[spacer_mid_y:spacer_end_y, x_pos:x_pos+token_size_px] = next_bg_color
-                            else:
-                                # No token below - fill entire spacer with current color
-                                spacer_start_y = y_pos + token_size_px
-                                spacer_end_y = spacer_start_y + y_spacer_px
-                                page[spacer_start_y:spacer_end_y, x_pos:x_pos+token_size_px] = bg_color
-                    
-                    # Fill corner spacer (split 4 ways between diagonal tokens)
-                    if col < tokens_per_row - 1 and row < tokens_per_col - 1 and x_spacer_px > 0 and y_spacer_px > 0:
-                        # Top-left quadrant: current token
-                        spacer_x = x_pos + token_size_px
-                        spacer_y = y_pos + token_size_px
-                        mid_x = spacer_x + x_spacer_px // 2
-                        mid_y = spacer_y + y_spacer_px // 2
+                    if shape_type == 'circle':
+                        # Draw circle at padded radius
+                        radius = (token_size_px // 2) + token_padding_px
+                        cv2.circle(page, (center_x, center_y), radius, gray_bgr, line_thickness)
+                    else:
+                        # Draw rounded rectangle at padded size
+                        rect_size = token_size_px + 2 * token_padding_px
+                        rect_x = slot_x
+                        rect_y = slot_y
+                        # Calculate corner radius based on original token's roundedness
+                        # For rounded squares, use about 15-20% of size as radius
+                        corner_radius = int(0.18 * rect_size)
                         
-                        page[spacer_y:mid_y, spacer_x:mid_x] = bg_color
+                        # Draw rounded rectangle using polylines
+                        pts = []
+                        # Top-left corner
+                        pts.append([rect_x + corner_radius, rect_y])
+                        # Top-right corner
+                        pts.append([rect_x + rect_size - corner_radius, rect_y])
+                        for angle in range(0, 91, 10):
+                            rad = np.radians(angle - 90)
+                            x = int(rect_x + rect_size - corner_radius + corner_radius * np.cos(rad))
+                            y = int(rect_y + corner_radius + corner_radius * np.sin(rad))
+                            pts.append([x, y])
+                        # Right edge
+                        pts.append([rect_x + rect_size, rect_y + corner_radius])
+                        pts.append([rect_x + rect_size, rect_y + rect_size - corner_radius])
+                        # Bottom-right corner
+                        for angle in range(0, 91, 10):
+                            rad = np.radians(angle)
+                            x = int(rect_x + rect_size - corner_radius + corner_radius * np.cos(rad))
+                            y = int(rect_y + rect_size - corner_radius + corner_radius * np.sin(rad))
+                            pts.append([x, y])
+                        # Bottom edge
+                        pts.append([rect_x + rect_size - corner_radius, rect_y + rect_size])
+                        pts.append([rect_x + corner_radius, rect_y + rect_size])
+                        # Bottom-left corner
+                        for angle in range(0, 91, 10):
+                            rad = np.radians(angle + 90)
+                            x = int(rect_x + corner_radius + corner_radius * np.cos(rad))
+                            y = int(rect_y + rect_size - corner_radius + corner_radius * np.sin(rad))
+                            pts.append([x, y])
+                        # Left edge
+                        pts.append([rect_x, rect_y + rect_size - corner_radius])
+                        pts.append([rect_x, rect_y + corner_radius])
+                        # Top-left corner
+                        for angle in range(0, 91, 10):
+                            rad = np.radians(angle + 180)
+                            x = int(rect_x + corner_radius + corner_radius * np.cos(rad))
+                            y = int(rect_y + corner_radius + corner_radius * np.sin(rad))
+                            pts.append([x, y])
                         
-                        # Top-right quadrant: token to the right
-                        right_index = temp_token_index + 1
-                        if right_index < total_tokens:
-                            right_filename = tokens_to_place[right_index]['filename']
-                            if right_filename in metadata_dict:
-                                right_border_color = metadata_dict[right_filename]['border_color']
-                                right_bg_color = (right_border_color['b'], right_border_color['g'], right_border_color['r'], 255)
-                                page[spacer_y:mid_y, mid_x:spacer_x+x_spacer_px] = right_bg_color
-                        else:
-                            # No token to the right - use current token color
-                            page[spacer_y:mid_y, mid_x:spacer_x+x_spacer_px] = bg_color
-                        
-                        # Bottom-left quadrant: token below
-                        below_index = temp_token_index + tokens_per_row
-                        if below_index < total_tokens:
-                            below_filename = tokens_to_place[below_index]['filename']
-                            if below_filename in metadata_dict:
-                                below_border_color = metadata_dict[below_filename]['border_color']
-                                below_bg_color = (below_border_color['b'], below_border_color['g'], below_border_color['r'], 255)
-                                page[mid_y:spacer_y+y_spacer_px, spacer_x:mid_x] = below_bg_color
-                        else:
-                            # No token below - use current token color
-                            page[mid_y:spacer_y+y_spacer_px, spacer_x:mid_x] = bg_color
-                        
-                        # Bottom-right quadrant: token diagonally down-right
-                        diag_index = temp_token_index + tokens_per_row + 1
-                        if diag_index < total_tokens:
-                            diag_filename = tokens_to_place[diag_index]['filename']
-                            if diag_filename in metadata_dict:
-                                diag_border_color = metadata_dict[diag_filename]['border_color']
-                                diag_bg_color = (diag_border_color['b'], diag_border_color['g'], diag_border_color['r'], 255)
-                                page[mid_y:spacer_y+y_spacer_px, mid_x:spacer_x+x_spacer_px] = diag_bg_color
-                        else:
-                            # No diagonal token - use current token color
-                            page[mid_y:spacer_y+y_spacer_px, mid_x:spacer_x+x_spacer_px] = bg_color
-                    
-                    # Extend right spacer into right margin (for last column)
-                    if col == tokens_per_row - 1 and y_spacer_px > 0 and row < tokens_per_col - 1:
-                        margin_bleed = min(x_margin_px, x_spacer_px)
-                        spacer_start_y = y_pos + token_size_px
-                        spacer_mid_y = spacer_start_y + y_spacer_px // 2
-                        spacer_end_y = spacer_start_y + y_spacer_px
-                        
-                        # Top half: current token color
-                        page[spacer_start_y:spacer_mid_y, x_pos+token_size_px:x_pos+token_size_px+margin_bleed] = bg_color
-                        
-                        # Bottom half: token below color
-                        below_index = temp_token_index + tokens_per_row
-                        if below_index < total_tokens:
-                            below_filename = tokens_to_place[below_index]['filename']
-                            if below_filename in metadata_dict:
-                                below_border_color = metadata_dict[below_filename]['border_color']
-                                below_bg_color = (below_border_color['b'], below_border_color['g'], below_border_color['r'], 255)
-                                page[spacer_mid_y:spacer_end_y, x_pos+token_size_px:x_pos+token_size_px+margin_bleed] = below_bg_color
-                    
-                    # Extend bottom spacer into bottom margin (for last row)
-                    if row == tokens_per_col - 1 and x_spacer_px > 0 and col < tokens_per_row - 1:
-                        margin_bleed = min(y_margin_px, y_spacer_px)
-                        spacer_start_x = x_pos + token_size_px
-                        spacer_mid_x = spacer_start_x + x_spacer_px // 2
-                        spacer_end_x = spacer_start_x + x_spacer_px
-                        
-                        # Left half: current token color
-                        page[y_pos+token_size_px:y_pos+token_size_px+margin_bleed, spacer_start_x:spacer_mid_x] = bg_color
-                        
-                        # Right half: token to the right color
-                        right_index = temp_token_index + 1
-                        if right_index < total_tokens:
-                            right_filename = tokens_to_place[right_index]['filename']
-                            if right_filename in metadata_dict:
-                                right_border_color = metadata_dict[right_filename]['border_color']
-                                right_bg_color = (right_border_color['b'], right_border_color['g'], right_border_color['r'], 255)
-                                page[y_pos+token_size_px:y_pos+token_size_px+margin_bleed, spacer_mid_x:spacer_end_x] = right_bg_color
-                    
-                    # Fill corner margin areas (4-way split at corner intersections)
-                    # Bottom-right corner margin
-                    if col == tokens_per_row - 1 and row == tokens_per_col - 1:
-                        margin_bleed_x = min(x_margin_px, x_spacer_px)
-                        margin_bleed_y = min(y_margin_px, y_spacer_px)
-                        corner_x = x_pos + token_size_px
-                        corner_y = y_pos + token_size_px
-                        page[corner_y:corner_y+margin_bleed_y, corner_x:corner_x+margin_bleed_x] = bg_color
-                
+                        pts = np.array(pts, np.int32)
+                        pts = pts.reshape((-1, 1, 2))
+                        cv2.polylines(page, [pts], True, gray_bgr, line_thickness)
                 temp_token_index += 1
-            
             if temp_token_index >= total_tokens:
                 break
         
-        # Draw black grid outline lines (bisecting spacers) - after backgrounds, before tokens
-        for col in range(tokens_per_row + 1):
-            # Grid line position (bisects the spacer between tokens)
-            x_grid = x_margin_px + col * (token_size_px + x_spacer_px) + token_size_px + x_spacer_px // 2
-            if col < tokens_per_row:  # Don't draw past the last column
-                cv2.line(page, (x_grid, y_margin_px), (x_grid, page_height_px - y_margin_px), black_bgr, line_thickness)
+        # (No grid lines between tokens when using padding)
         
-        for row in range(tokens_per_col + 1):
-            # Grid line position (bisects the spacer between tokens)
-            y_grid = y_margin_px + row * (token_size_px + y_spacer_px) + token_size_px + y_spacer_px // 2
-            if row < tokens_per_col:  # Don't draw past the last row
-                cv2.line(page, (x_margin_px, y_grid), (page_width_px - x_margin_px, y_grid), black_bgr, line_thickness)
-        
-        # Second pass: Place tokens on top of the colored backgrounds
+        # Second pass: Place tokens on top of the page at padded positions
         for row in range(tokens_per_col):
             for col in range(tokens_per_row):
                 if token_index >= total_tokens:
                     break
-                
                 token_info = tokens_to_place[token_index]
                 filename = token_info['filename']
                 subfolder = token_info['subfolder']
-                
-                # Build token path with subfolder if present
+                # Per-token padding override
+                token_padding = padding
+                if 'padding' in token_info:
+                    token_padding = token_info['padding']
+                token_padding_px = int(token_padding * ppi)
+                # Calculate slot position
+                slot_x = x_margin_px + col * (token_size_px + 2 * padding_px)
+                slot_y = y_margin_px + row * (token_size_px + 2 * padding_px)
+                # Place token image centered in slot
                 if subfolder:
                     token_path = img_folder / subfolder / filename
                 else:
                     token_path = img_folder / filename
-                
-                # Calculate position for this token
-                x_pos = x_margin_px + col * (token_size_px + x_spacer_px)
-                y_pos = y_margin_px + row * (token_size_px + y_spacer_px)
-                
-                # Load token image
                 token_img = cv2.imread(str(token_path), cv2.IMREAD_UNCHANGED)
-                
                 if token_img is None:
                     print(f"Warning: Could not load {filename}")
                     token_index += 1
                     continue
                 
+                # Apply brightness adjustments
+                token_img = apply_brightness_adjustment(token_img, settings, token_info)
+                
+                # Store original size for scale calculation
+                original_h, original_w = token_img.shape[:2]
+                
                 # Crop to the bounding box of non-transparent pixels
-                if token_img.shape[2] == 4:  # Has alpha channel
-                    # Find non-transparent pixels
+                if token_img.shape[2] == 4:
                     alpha_mask = token_img[:, :, 3] > 0
                     rows = np.any(alpha_mask, axis=1)
                     cols = np.any(alpha_mask, axis=0)
-                    
                     if rows.any() and cols.any():
                         y_min, y_max = np.where(rows)[0][[0, -1]]
                         x_min, x_max = np.where(cols)[0][[0, -1]]
-                        
-                        # Crop to content
                         token_img = token_img[y_min:y_max+1, x_min:x_max+1]
                 
-                # Resize token to target size using highest quality interpolation
-                token_resized = cv2.resize(token_img, (token_size_px, token_size_px), 
-                                          interpolation=cv2.INTER_LANCZOS4)
+                # Get cropped size for scale calculation
+                cropped_h, cropped_w = token_img.shape[:2]
                 
-                # Place token on page using alpha blending
-                if token_resized.shape[2] == 4:  # Has alpha channel
-                    # Extract alpha channel
+                # Resize token to target size
+                token_resized = cv2.resize(token_img, (token_size_px, token_size_px), interpolation=cv2.INTER_LANCZOS4)
+                
+                # Calculate scale ratio (from cropped to output)
+                scale_ratio = token_size_px / max(cropped_w, cropped_h)
+                # Compute placement
+                x_pos = slot_x + token_padding_px
+                y_pos = slot_y + token_padding_px
+                # Place with alpha blending
+                if token_resized.shape[2] == 4:
                     alpha = token_resized[:, :, 3] / 255.0
-                    
-                    # Blend token onto page
-                    for c in range(3):  # RGB channels
-                        page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, c] = \
-                            (alpha * token_resized[:, :, c] + 
-                             (1 - alpha) * page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, c])
-                    
-                    # Update alpha channel (make opaque where token is placed)
+                    for c in range(3):
+                        page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, c] = (
+                            alpha * token_resized[:, :, c] +
+                            (1 - alpha) * page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, c]
+                        )
                     page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, 3] = 255
                 else:
-                    # No alpha channel, just copy
                     page[y_pos:y_pos+token_size_px, x_pos:x_pos+token_size_px, :3] = token_resized
+                
+                # Draw brightness adjustment text below the token in the padding area
+                brightness_text = token_info.get('brightness_adjustment', '')
+                if token_padding_px > 5:  # Only if we have padding space
+                    # Build info text with brightness and scale
+                    info_parts = []
+                    if brightness_text:
+                        info_parts.append(f"BA:{brightness_text}")
+                    info_parts.append(f"S:{scale_ratio:.2f}x")
+                    info_parts.append(f"PPI:{ppi}")
+                    
+                    info_text = " | ".join(info_parts)
+                    
+                    # Calculate text position (bottom of padding area)
+                    text_x = slot_x + token_padding_px
+                    text_y = slot_y + token_size_px + token_padding_px + token_padding_px - 2  # Bottom of padding
+                    
+                    # Use smallest font size, scale based on PPI
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    font_scale = max(0.2, token_padding_px / 80.0)  # Scale with padding
+                    font_thickness = 1
+                    text_color = (100, 100, 100, 255)  # Gray
+                    
+                    # Get text size to center it
+                    (text_width, text_height), baseline = cv2.getTextSize(
+                        info_text, font, font_scale, font_thickness
+                    )
+                    
+                    # Center text horizontally in the token area
+                    text_x_centered = slot_x + token_padding_px + (token_size_px - text_width) // 2
+                    
+                    # Ensure text fits in padding area
+                    if text_height + 2 <= token_padding_px:
+                        cv2.putText(page, info_text, 
+                                  (text_x_centered, text_y), 
+                                  font, font_scale, text_color, font_thickness, cv2.LINE_AA)
                 
                 token_index += 1
                 tokens_on_this_page += 1
-            
             if token_index >= total_tokens:
                 break
         

@@ -4,8 +4,7 @@
     "print_height": 11.0,
     "x_margin": 0.3,
     "y_margin": 0.3,
-    "x_spacer": 0.15,
-    "y_spacer": 0.15,
+    "padding": 0.15,
     "token_size": 1.0,
     "ppi": [
       300,
@@ -62,6 +61,56 @@
       "filename": "wall.png",
       "quantity": 1,
       "subfolder": "dungeonrush"
+    },
+    {
+      "filename": "dungeonrush_cover1.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
+    },
+    {
+      "filename": "dungeonrush_cover2.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
+    },
+    {
+      "filename": "empty.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
+    },
+    {
+      "filename": "trap_bomb.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
+    },
+    {
+      "filename": "trap_cage.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
+    },
+    {
+      "filename": "trap_oilslick.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
+    },
+    {
+      "filename": "trap_pushback.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
+    },
+    {
+      "filename": "trap_spikes.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
+    },
+    {
+      "filename": "treasure.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
+    },
+    {
+      "filename": "wall.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
     },
     {
       "filename": "quantum_gobblet_l.png",

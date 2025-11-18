@@ -1,104 +1,43 @@
 {
   "settings": {
-    "print_width": 6,
-    "print_height": 4,
+    "print_width": 10,
+    "print_height": 7,
     "x_margin": 0.1,
-    "y_margin": 0.2,
-    "x_spacer": 0.2,
-    "y_spacer": 0.2,
-    "token_size": 1.0,
+    "y_margin": 0.1,
+    "padding": 0.1,
+    "token_size": 1.3,
     "ppi": [
-      300,
       600
     ],
+    "brightness_adjustment": "[1.2,1.5]-[0]-[1]-[1,1.5,2]",
     "calculated": {
-      "tokens_per_row": 5,
-      "tokens_per_col": 3,
-      "tokens_per_page": 15,
-      "wasted_x": 0.0,
-      "wasted_y": 0.2,
-      "total_tokens": 30,
-      "wasted_tokens": 0
+      "tokens_per_row": 6,
+      "tokens_per_col": 4,
+      "tokens_per_page": 24,
+      "wasted_x": 0.8,
+      "wasted_y": 0.8,
+      "total_tokens": 4,
+      "wasted_tokens": 20
     }
   },
   "tokens_quantity_list": [
     {
-      "filename": "dungeonrush_cover1.png",
-      "subfolder": "dungeonrush",
-      "quantity": 6
-    },
-    {
       "filename": "dungeonrush_cover2.png",
-      "subfolder": "dungeonrush",
-      "quantity": 6
-    },
-    {
-      "filename": "empty.png",
-      "subfolder": "dungeonrush",
-      "quantity": 5
-    },
-    {
-      "filename": "trap_bomb.png",
-      "subfolder": "dungeonrush",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
     },
     {
       "filename": "trap_cage.png",
-      "subfolder": "dungeonrush",
-      "quantity": 1
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
     },
     {
-      "filename": "trap_oilslick.png",
-      "subfolder": "dungeonrush",
-      "quantity": 1
-    },
-    {
-      "filename": "trap_pushback.png",
-      "subfolder": "dungeonrush",
-      "quantity": 1
-    },
-    {
-      "filename": "trap_spikes.png",
-      "subfolder": "dungeonrush",
-      "quantity": 1
-    },
-    {
-      "filename": "treasure.png",
-      "subfolder": "dungeonrush",
-      "quantity": 1
-    },
-    {
-      "filename": "wall.png",
-      "subfolder": "dungeonrush",
-      "quantity": 1
-    },
-    {
-      "filename": "quantum_gobblet_l.png",
-      "subfolder": "quantumgobblet",
-      "quantity": 1
-    },
-    {
-      "filename": "quantum_gobblet_m.png",
-      "subfolder": "quantumgobblet",
-      "quantity": 1
-    },
-    {
-      "filename": "quantum_gobblet_s.png",
-      "subfolder": "quantumgobblet",
-      "quantity": 1
-    },
-    {
-      "filename": "quantum_gobblet_xl.png",
-      "subfolder": "quantumgobblet",
-      "quantity": 1
+      "filename": "trap_bomb.png",
+      "quantity": 1,
+      "subfolder": "dungeonrush_square"
     },
     {
       "filename": "zombie_active.png",
-      "quantity": 1,
-      "subfolder": "zombie"
-    },
-    {
-      "filename": "zombie_dead.png",
       "quantity": 1,
       "subfolder": "zombie"
     }
