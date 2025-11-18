@@ -423,7 +423,9 @@ def process_all_images(input_folder="img/input", output_subfolder="img/output"):
                 "padding": 0.15,
                 "token_size": 1.0,
                 "ppi": [300, 600],
-                "brightness_adjustment": "1-0-1-1"
+                "brightness_adjustment": "1-0-1-1",
+                "buffer_color": "black",
+                "buffer_size": 0.1
             },
             "tokens_quantity_list": [
                 {
