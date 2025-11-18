@@ -414,6 +414,19 @@ def create_print_layout(template, output_base_path, metadata_path):
     print(f"Pages needed: {pages_needed}")
     print("-" * 50)
     
+    # Calculate centering offsets for grid
+    # Total space used by grid
+    grid_width = tokens_per_row * (token_size_px + 2 * padding_px)
+    grid_height = tokens_per_col * (token_size_px + 2 * padding_px)
+    
+    # Available space within margins
+    available_width = page_width_px - 2 * x_margin_px
+    available_height = page_height_px - 2 * y_margin_px
+    
+    # Calculate offsets to center the grid
+    x_offset = (available_width - grid_width) // 2
+    y_offset = (available_height - grid_height) // 2
+    
     output_files = []
     token_index = 0
     
@@ -433,6 +446,44 @@ def create_print_layout(template, output_base_path, metadata_path):
         # Right
         cv2.line(page, (page_width_px - x_margin_px, 0), (page_width_px - x_margin_px, page_height_px), gray_bgr, line_thickness)
         
+        # Draw grid boundary lines (showing actual grid area with centering)
+        if x_offset > 0 or y_offset > 0:
+            grid_color = (180, 180, 180, 255)  # Lighter gray for grid boundaries
+            grid_left = x_margin_px + x_offset
+            grid_right = grid_left + grid_width
+            grid_top = y_margin_px + y_offset
+            grid_bottom = grid_top + grid_height
+            
+            # Horizontal lines (top and bottom of grid, extending full width)
+            cv2.line(page, (0, grid_top), (page_width_px, grid_top), grid_color, line_thickness)
+            cv2.line(page, (0, grid_bottom), (page_width_px, grid_bottom), grid_color, line_thickness)
+            # Vertical lines (left and right of grid, extending full height)
+            cv2.line(page, (grid_left, 0), (grid_left, page_height_px), grid_color, line_thickness)
+            cv2.line(page, (grid_right, 0), (grid_right, page_height_px), grid_color, line_thickness)
+        
+        # Draw measurement tick marks every 1 inch
+        tick_color = (100, 100, 100, 255)  # Dark gray for tick marks
+        tick_length = y_margin_px  # Margin height for vertical ticks
+        inch_interval = ppi  # 1 inch in pixels
+        
+        # Horizontal tick marks along top and bottom edges (within margins)
+        x_pos = inch_interval
+        while x_pos < page_width_px:
+            # Top edge ticks (extending down into top margin)
+            cv2.line(page, (x_pos, 0), (x_pos, y_margin_px), tick_color, line_thickness)
+            # Bottom edge ticks (extending up into bottom margin)
+            cv2.line(page, (x_pos, page_height_px - y_margin_px), (x_pos, page_height_px), tick_color, line_thickness)
+            x_pos += inch_interval
+        
+        # Vertical tick marks along left and right edges (within margins)
+        y_pos = inch_interval
+        while y_pos < page_height_px:
+            # Left edge ticks (extending right into left margin)
+            cv2.line(page, (0, y_pos), (x_margin_px, y_pos), tick_color, line_thickness)
+            # Right edge ticks (extending left into right margin)
+            cv2.line(page, (page_width_px - x_margin_px, y_pos), (page_width_px, y_pos), tick_color, line_thickness)
+            y_pos += inch_interval
+        
         tokens_on_this_page = 0
         
         # Draw token padding borders
@@ -449,9 +500,9 @@ def create_print_layout(template, output_base_path, metadata_path):
                 if 'padding' in token_info:
                     token_padding = token_info['padding']
                 token_padding_px = int(token_padding * ppi)
-                # Calculate center position for this token's slot
-                slot_x = x_margin_px + col * (token_size_px + 2 * padding_px)
-                slot_y = y_margin_px + row * (token_size_px + 2 * padding_px)
+                # Calculate center position for this token's slot (with centering offset)
+                slot_x = x_margin_px + x_offset + col * (token_size_px + 2 * padding_px)
+                slot_y = y_margin_px + y_offset + row * (token_size_px + 2 * padding_px)
                 center_x = slot_x + token_size_px // 2 + token_padding_px
                 center_y = slot_y + token_size_px // 2 + token_padding_px
                 # Draw border: circle or rounded square based on token shape
@@ -535,9 +586,9 @@ def create_print_layout(template, output_base_path, metadata_path):
                 if 'padding' in token_info:
                     token_padding = token_info['padding']
                 token_padding_px = int(token_padding * ppi)
-                # Calculate slot position
-                slot_x = x_margin_px + col * (token_size_px + 2 * padding_px)
-                slot_y = y_margin_px + row * (token_size_px + 2 * padding_px)
+                # Calculate slot position (with centering offset)
+                slot_x = x_margin_px + x_offset + col * (token_size_px + 2 * padding_px)
+                slot_y = y_margin_px + y_offset + row * (token_size_px + 2 * padding_px)
                 # Place token image centered in slot
                 if subfolder:
                     token_path = img_folder / subfolder / filename
