@@ -12,6 +12,7 @@
       "major_axis": 807.4,
       "minor_axis": 804.3,
       "ellipse_angle": 90.6,
+      "radial_variance": 0.0032,
       "circularity": 0.899
     },
     "border_color": {
@@ -42,6 +43,7 @@
       "major_axis": 807.3,
       "minor_axis": 804.4,
       "ellipse_angle": 90.7,
+      "radial_variance": 0.0033,
       "circularity": 0.899
     },
     "border_color": {
@@ -72,6 +74,7 @@
       "major_axis": 802.9,
       "minor_axis": 802.0,
       "ellipse_angle": 63.5,
+      "radial_variance": 0.0024,
       "circularity": 0.898
     },
     "border_color": {
@@ -102,6 +105,7 @@
       "major_axis": 804.1,
       "minor_axis": 803.3,
       "ellipse_angle": 16.5,
+      "radial_variance": 0.0024,
       "circularity": 0.898
     },
     "border_color": {
@@ -132,6 +136,7 @@
       "major_axis": 810.2,
       "minor_axis": 809.3,
       "ellipse_angle": 96.7,
+      "radial_variance": 0.0015,
       "circularity": 0.899
     },
     "border_color": {
@@ -162,6 +167,7 @@
       "major_axis": 803.3,
       "minor_axis": 802.3,
       "ellipse_angle": 100.8,
+      "radial_variance": 0.0025,
       "circularity": 0.899
     },
     "border_color": {
@@ -192,6 +198,7 @@
       "major_axis": 806.6,
       "minor_axis": 802.6,
       "ellipse_angle": 92.9,
+      "radial_variance": 0.003,
       "circularity": 0.898
     },
     "border_color": {
@@ -222,6 +229,7 @@
       "major_axis": 772.6,
       "minor_axis": 772.0,
       "ellipse_angle": 104.6,
+      "radial_variance": 0.002,
       "circularity": 0.9
     },
     "border_color": {
@@ -252,6 +260,7 @@
       "major_axis": 810.0,
       "minor_axis": 808.7,
       "ellipse_angle": 11.6,
+      "radial_variance": 0.0019,
       "circularity": 0.899
     },
     "border_color": {
@@ -282,6 +291,7 @@
       "major_axis": 807.2,
       "minor_axis": 806.2,
       "ellipse_angle": 68.4,
+      "radial_variance": 0.0024,
       "circularity": 0.899
     },
     "border_color": {
@@ -311,7 +321,8 @@
       "aspect_ratio": 1.259,
       "major_axis": 1043.5,
       "minor_axis": 828.6,
-      "ellipse_angle": 88.1
+      "ellipse_angle": 88.1,
+      "radial_variance": 0.0975
     },
     "border_color": {
       "r": 153,
@@ -341,6 +352,7 @@
       "major_axis": 1017.1,
       "minor_axis": 1008.5,
       "ellipse_angle": 90.4,
+      "radial_variance": 0.0919,
       "circularity": 0.853
     },
     "border_color": {
@@ -371,6 +383,7 @@
       "major_axis": 789.9,
       "minor_axis": 784.9,
       "ellipse_angle": 90.0,
+      "radial_variance": 0.0929,
       "circularity": 0.85
     },
     "border_color": {
@@ -401,6 +414,7 @@
       "major_axis": 1063.6,
       "minor_axis": 1055.6,
       "ellipse_angle": 176.1,
+      "radial_variance": 0.0817,
       "circularity": 0.871
     },
     "border_color": {
@@ -431,6 +445,7 @@
       "major_axis": 915.9,
       "minor_axis": 915.2,
       "ellipse_angle": 84.5,
+      "radial_variance": 0.0858,
       "circularity": 0.865
     },
     "border_color": {
@@ -461,6 +476,7 @@
       "major_axis": 1137.4,
       "minor_axis": 1136.1,
       "ellipse_angle": 87.5,
+      "radial_variance": 0.0944,
       "circularity": 0.846
     },
     "border_color": {
@@ -491,6 +507,7 @@
       "major_axis": 1012.0,
       "minor_axis": 1003.1,
       "ellipse_angle": 87.3,
+      "radial_variance": 0.0913,
       "circularity": 0.854
     },
     "border_color": {
@@ -521,6 +538,7 @@
       "major_axis": 949.3,
       "minor_axis": 948.9,
       "ellipse_angle": 11.6,
+      "radial_variance": 0.096,
       "circularity": 0.842
     },
     "border_color": {
@@ -550,7 +568,8 @@
       "aspect_ratio": 1.031,
       "major_axis": 964.7,
       "minor_axis": 935.7,
-      "ellipse_angle": 179.9
+      "ellipse_angle": 179.9,
+      "radial_variance": 0.0776
     },
     "border_color": {
       "r": 138,
@@ -580,6 +599,7 @@
       "major_axis": 990.0,
       "minor_axis": 986.7,
       "ellipse_angle": 179.3,
+      "radial_variance": 0.0842,
       "circularity": 0.869
     },
     "border_color": {
@@ -610,6 +630,7 @@
       "major_axis": 370.8,
       "minor_axis": 370.2,
       "ellipse_angle": 31.7,
+      "radial_variance": 0.0047,
       "circularity": 0.898
     },
     "border_color": {
@@ -635,11 +656,12 @@
     "ypos": 199.5,
     "diameter": 397.0,
     "shape": {
-      "type": "rounded_square",
+      "type": "circle",
       "aspect_ratio": 1.012,
       "major_axis": 371.5,
       "minor_axis": 367.1,
       "ellipse_angle": 84.6,
+      "radial_variance": 0.0509,
       "circularity": 0.829
     },
     "border_color": {
@@ -670,6 +692,7 @@
       "major_axis": 369.4,
       "minor_axis": 368.4,
       "ellipse_angle": 96.9,
+      "radial_variance": 0.015,
       "circularity": 0.892
     },
     "border_color": {
@@ -695,11 +718,12 @@
     "ypos": 202.5,
     "diameter": 392.3,
     "shape": {
-      "type": "rounded_square",
+      "type": "circle",
       "aspect_ratio": 1.003,
       "major_axis": 370.4,
       "minor_axis": 369.2,
       "ellipse_angle": 103.9,
+      "radial_variance": 0.0464,
       "circularity": 0.839
     },
     "border_color": {
@@ -725,11 +749,12 @@
     "ypos": 510.7,
     "diameter": 1030.9,
     "shape": {
-      "type": "rounded_square",
+      "type": "circle",
       "aspect_ratio": 1.0,
       "major_axis": 1021.9,
       "minor_axis": 1021.5,
       "ellipse_angle": 133.2,
+      "radial_variance": 0.0027,
       "circularity": 0.838
     },
     "border_color": {
@@ -755,11 +780,12 @@
     "ypos": 510.8,
     "diameter": 1030.9,
     "shape": {
-      "type": "rounded_square",
+      "type": "circle",
       "aspect_ratio": 1.001,
       "major_axis": 1022.1,
       "minor_axis": 1021.0,
       "ellipse_angle": 103.8,
+      "radial_variance": 0.0027,
       "circularity": 0.837
     },
     "border_color": {

@@ -13,6 +13,73 @@ import numpy as np
 from pathlib import Path
 
 
+def calculate_radial_variance(contour, center):
+    """
+    Calculate radial variance to distinguish circles from rounded squares.
+    Measures distance from center to contour edge at many angles.
+    
+    Args:
+        contour: OpenCV contour points
+        center: (x, y) tuple of shape center
+        
+    Returns:
+        dict: {
+            'radial_std': standard deviation of radii (normalized),
+            'radial_variance_ratio': variance relative to mean radius,
+            'is_circle': True if shape is circular (low radial variance)
+        }
+    """
+    cx, cy = center
+    num_angles = 360  # Sample every degree
+    
+    radii = []
+    for angle_deg in range(num_angles):
+        angle_rad = np.deg2rad(angle_deg)
+        # Create a ray from center in this direction
+        direction = np.array([np.cos(angle_rad), np.sin(angle_rad)])
+        
+        # Find intersection with contour by sampling along ray
+        # Use maximum image dimension as search distance
+        max_dist = 2000
+        best_dist = 0
+        
+        for dist in range(10, max_dist, 2):
+            point = np.array([cx, cy]) + direction * dist
+            px, py = int(point[0]), int(point[1])
+            
+            # Check if this point is on the contour
+            result = cv2.pointPolygonTest(contour, (float(px), float(py)), False)
+            if result >= 0:  # Inside or on the contour
+                best_dist = dist
+            elif best_dist > 0:  # Was inside, now outside - found edge
+                break
+        
+        if best_dist > 0:
+            radii.append(best_dist)
+    
+    if len(radii) < 180:  # Need at least half the samples
+        return {
+            'radial_std': 0,
+            'radial_variance_ratio': 0,
+            'is_circle': False
+        }
+    
+    radii = np.array(radii)
+    mean_radius = np.mean(radii)
+    std_radius = np.std(radii)
+    variance_ratio = std_radius / mean_radius if mean_radius > 0 else 0
+    
+    # Circles have low radial variance (< 3% of mean radius)
+    # Rounded squares have higher variance due to flat sides
+    is_circle = variance_ratio < 0.03
+    
+    return {
+        'radial_std': float(std_radius),
+        'radial_variance_ratio': float(variance_ratio),
+        'is_circle': bool(is_circle)
+    }
+
+
 def find_circular_mask(image):
     """
     Detect the circular token in the image and create a mask.
@@ -72,6 +139,10 @@ def find_circular_mask(image):
         perimeter = cv2.arcLength(largest_contour, True)
         circularity = (4 * np.pi * area) / (perimeter * perimeter) if perimeter > 0 else 0
         
+        # Calculate radial variance to distinguish circles from rounded squares
+        # This is more robust than perimeter-based circularity for rough/textured borders
+        radial_info = calculate_radial_variance(largest_contour, (x, y))
+        
         # Fit ellipse to detect scaling/stretching
         ellipse_info = None
         if len(largest_contour) >= 5:  # Need at least 5 points to fit ellipse
@@ -96,6 +167,8 @@ def find_circular_mask(image):
             'y': float(y),
             'radius': float(radius),
             'circularity': float(circularity),
+            'radial_variance': radial_info['radial_variance_ratio'],
+            'is_radially_circular': radial_info['is_circle'],
             'ellipse': ellipse_info
         }
         
@@ -217,27 +290,34 @@ def remove_background(image_path, output_path):
     # Apply mask to alpha channel
     img_rgba[:, :, 3] = mask
     
-    # Save result
-    cv2.imwrite(str(output_path), img_rgba)
-    print(f"Processed: {image_path.name} -> {output_path.name}")
-    
     # Create metadata with shape classification
     ellipse = circle_info.get('ellipse') if circle_info else None
     circularity = round(circle_info['circularity'], 3) if circle_info else 0
     aspect_ratio = round(ellipse['aspect_ratio'], 3) if ellipse else 1.0
+    radial_variance = round(circle_info.get('radial_variance', 1.0), 4) if circle_info else 1.0
+    is_radially_circular = circle_info.get('is_radially_circular', False) if circle_info else False
     
-    # Classify shape
+    # Classify shape using radial variance (more robust than perimeter-based circularity)
+    # Radial variance < 3% = circle (uniform radius in all directions)
+    # Radial variance >= 3% = rounded square (flat sides cause variance)
     shape_type = 'unknown'
-    if circularity >= 0.89 and 0.97 <= aspect_ratio <= 1.03:
+    if is_radially_circular and 0.97 <= aspect_ratio <= 1.03:
         shape_type = 'circle'
-    elif circularity >= 0.80 and 0.97 <= aspect_ratio <= 1.03:
+    elif radial_variance < 0.06 and 0.97 <= aspect_ratio <= 1.03:
+        # Slightly higher variance but still relatively circular
+        shape_type = 'circle'
+    elif radial_variance >= 0.06 and 0.97 <= aspect_ratio <= 1.03:
         shape_type = 'rounded_square'
     elif circularity < 0.80 and 0.97 <= aspect_ratio <= 1.03:
         shape_type = 'square'
-    elif circularity >= 0.80 and aspect_ratio > 1.03:
+    elif radial_variance >= 0.06 and aspect_ratio > 1.03:
         shape_type = 'rounded_rect'
     else:
         shape_type = 'rect'
+    
+    # Save result
+    cv2.imwrite(str(output_path), img_rgba)
+    print(f"Processed: {image_path.name} -> {output_path.name} [{shape_type}]")
     
     # Build shape info
     shape_info = {
@@ -245,10 +325,11 @@ def remove_background(image_path, output_path):
         'aspect_ratio': aspect_ratio,
         'major_axis': round(ellipse['major_axis'], 1) if ellipse else 0,
         'minor_axis': round(ellipse['minor_axis'], 1) if ellipse else 0,
-        'ellipse_angle': round(ellipse['angle'], 1) if ellipse else 0
+        'ellipse_angle': round(ellipse['angle'], 1) if ellipse else 0,
+        'radial_variance': radial_variance
     }
     
-    # Add circularity for circular shapes
+    # Add circularity for reference (but not used in classification anymore)
     if shape_type in ['circle', 'rounded_square']:
         shape_info['circularity'] = circularity
     
