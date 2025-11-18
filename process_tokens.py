@@ -422,7 +422,8 @@ def process_all_images(input_folder="img/input", output_subfolder="img/output"):
                 "y_margin": 0.3,
                 "padding": 0.15,
                 "token_size": 1.0,
-                "ppi": [300, 600]
+                "ppi": [300, 600],
+                "brightness_adjustment": "1-0-1-1"
             },
             "tokens_quantity_list": [
                 {

@@ -368,17 +368,37 @@ def create_print_layout(template, output_base_path, metadata_path):
             effective_brightness = brightness_adj or template_brightness
             
             if effective_brightness:
-                # Expand array notation if present
-                if isinstance(effective_brightness, str):
-                    expanded = expand_brightness_string(effective_brightness)
-                    if len(expanded) > 1:
-                        # Multiple expanded values - create one token per expansion
-                        for expanded_str in expanded:
+                # Handle array of brightness strings at template level
+                if isinstance(effective_brightness, list):
+                    # Array of brightness configs - expand each and combine
+                    all_expanded = []
+                    for brightness_config in effective_brightness:
+                        if isinstance(brightness_config, str):
+                            expanded = expand_brightness_string(brightness_config)
+                            all_expanded.extend(expanded)
+                        else:
+                            all_expanded.append(brightness_config)
+                    
+                    # Create quantity copies per expansion
+                    for _ in range(quantity):
+                        for expanded_str in all_expanded:
                             tokens_to_place.append({
                                 'filename': filename,
                                 'subfolder': subfolder,
                                 'brightness_adjustment': expanded_str
                             })
+                # Handle single brightness string or dict
+                elif isinstance(effective_brightness, str):
+                    expanded = expand_brightness_string(effective_brightness)
+                    if len(expanded) > 1:
+                        # Multiple expanded values - create quantity copies per expansion
+                        for _ in range(quantity):
+                            for expanded_str in expanded:
+                                tokens_to_place.append({
+                                    'filename': filename,
+                                    'subfolder': subfolder,
+                                    'brightness_adjustment': expanded_str
+                                })
                     else:
                         # Single value after expansion
                         for _ in range(quantity):
@@ -779,6 +799,7 @@ if __name__ == "__main__":
                 settings = template['settings']
                 width = settings['print_width']
                 height = settings['print_height']
+                token_size = settings['token_size']
                 ppi_setting = settings['ppi']
                 
                 # Handle ppi as either a single value or array
@@ -793,10 +814,11 @@ if __name__ == "__main__":
                     # Update settings with current PPI
                     settings['ppi'] = ppi
                     
-                    # Create output filename with dimensions and PPI (replace decimal points)
+                    # Create output filename with dimensions, token size, and PPI (replace decimal points)
                     width_str = str(width).replace('.', '_')
                     height_str = str(height).replace('.', '_')
-                    output_filename = f"output_{width_str}x{height_str}_{ppi}ppi.png"
+                    token_size_str = str(token_size).replace('.', '_')
+                    output_filename = f"output_{width_str}x{height_str}_{token_size_str}in_{ppi}ppi.png"
                     output_path = template_folder / output_filename
                     
                     # Generate the layout
